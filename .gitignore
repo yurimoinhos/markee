@@ -1,0 +1,4 @@
+.env
+.docker/
+go.sum
+.idea/

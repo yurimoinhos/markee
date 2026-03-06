@@ -1,0 +1,274 @@
+basePath: /api/v1
+definitions:
+  domain.User:
+    properties:
+      active:
+        type: boolean
+      balance:
+        type: integer
+      createdAt:
+        type: string
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: string
+      lastName:
+        type: string
+      phoneNumber:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  http.errorResponse:
+    properties:
+      error:
+        example: mensagem de erro
+        type: string
+    type: object
+  http.registerRequest:
+    properties:
+      email:
+        example: yuri@example.com
+        type: string
+      firstName:
+        example: Yuri
+        type: string
+      lastName:
+        example: Moinhos
+        type: string
+      phoneNumber:
+        example: "11999999999"
+        type: string
+    type: object
+  http.tokenRequest:
+    properties:
+      email:
+        example: yuri@example.com
+        type: string
+    type: object
+  http.tokenResponse:
+    properties:
+      access_token:
+        example: eyJhbGci...
+        type: string
+      token_type:
+        example: Bearer
+        type: string
+    type: object
+  http.updateUserRequest:
+    properties:
+      firstName:
+        example: Yuri
+        type: string
+      lastName:
+        example: Moinhos
+        type: string
+      phoneNumber:
+        example: "11999999999"
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: API modular de pagamentos com autenticação Bearer Token.
+  title: AggiPay API
+  version: 1.0.0
+paths:
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Cria um novo usuário no sistema
+      parameters:
+      - description: Dados do usuário
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/http.registerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Registrar usuário
+      tags:
+      - Auth
+  /auth/token:
+    post:
+      consumes:
+      - application/json
+      description: Gera um JWT para o e-mail informado (autenticação sem senha)
+      parameters:
+      - description: E-mail do usuário
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/http.tokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      summary: Gerar access token
+      tags:
+      - Auth
+  /auth/users:
+    get:
+      description: Retorna lista paginada de usuários
+      parameters:
+      - description: 'Página (padrão: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Tamanho da página (padrão: 10, máx: 100)'
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.User'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Listar usuários
+      tags:
+      - Users
+  /auth/users/{id}:
+    delete:
+      description: Realiza soft-delete de um usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Desativar usuário
+      tags:
+      - Users
+    get:
+      description: Retorna um usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Buscar usuário
+      tags:
+      - Users
+    put:
+      consumes:
+      - application/json
+      description: Atualiza os dados de um usuário pelo ID
+      parameters:
+      - description: ID do usuário
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados a atualizar
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/http.updateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/http.errorResponse'
+      security:
+      - BearerAuth: []
+      summary: Atualizar usuário
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    description: 'Informe: Bearer {token}'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
