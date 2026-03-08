@@ -8,6 +8,110 @@ import (
 )
 
 var (
+	// AutomationRunsColumns holds the columns for the "automation_runs" table.
+	AutomationRunsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "owner_user_id", Type: field.TypeString},
+		{Name: "automation_type", Type: field.TypeString},
+		{Name: "status", Type: field.TypeString, Default: "success"},
+		{Name: "details", Type: field.TypeString, Nullable: true},
+		{Name: "ran_at", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// AutomationRunsTable holds the schema information for the "automation_runs" table.
+	AutomationRunsTable = &schema.Table{
+		Name:       "automation_runs",
+		Columns:    AutomationRunsColumns,
+		PrimaryKey: []*schema.Column{AutomationRunsColumns[0]},
+	}
+	// ChargesColumns holds the columns for the "charges" table.
+	ChargesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "owner_user_id", Type: field.TypeString},
+		{Name: "customer_id", Type: field.TypeString},
+		{Name: "contract_id", Type: field.TypeString, Nullable: true},
+		{Name: "milestone_id", Type: field.TypeString, Nullable: true},
+		{Name: "charge_type", Type: field.TypeString, Default: "monthly"},
+		{Name: "amount_cents", Type: field.TypeUint64},
+		{Name: "currency", Type: field.TypeString, Default: "BRL"},
+		{Name: "payment_method", Type: field.TypeString, Default: "pix"},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "due_date", Type: field.TypeTime},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "external_id", Type: field.TypeString, Nullable: true},
+		{Name: "payment_link", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "qr_code", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ChargesTable holds the schema information for the "charges" table.
+	ChargesTable = &schema.Table{
+		Name:       "charges",
+		Columns:    ChargesColumns,
+		PrimaryKey: []*schema.Column{ChargesColumns[0]},
+	}
+	// ContractSignaturesColumns holds the columns for the "contract_signatures" table.
+	ContractSignaturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "contract_id", Type: field.TypeString},
+		{Name: "contract_version_id", Type: field.TypeString, Nullable: true},
+		{Name: "provider", Type: field.TypeString, Default: "clicksign"},
+		{Name: "provider_doc_id", Type: field.TypeString, Nullable: true},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "signer_name", Type: field.TypeString, Nullable: true},
+		{Name: "signer_email", Type: field.TypeString, Nullable: true},
+		{Name: "accepted_at", Type: field.TypeTime, Nullable: true},
+		{Name: "accepted_ip", Type: field.TypeString, Nullable: true, Size: 80},
+		{Name: "payload_json", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ContractSignaturesTable holds the schema information for the "contract_signatures" table.
+	ContractSignaturesTable = &schema.Table{
+		Name:       "contract_signatures",
+		Columns:    ContractSignaturesColumns,
+		PrimaryKey: []*schema.Column{ContractSignaturesColumns[0]},
+	}
+	// ContractVersionsColumns holds the columns for the "contract_versions" table.
+	ContractVersionsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "contract_id", Type: field.TypeString},
+		{Name: "version", Type: field.TypeInt},
+		{Name: "template_name", Type: field.TypeString, Size: 120},
+		{Name: "editable_content", Type: field.TypeString},
+		{Name: "pdf_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "editable_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "generated_at", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// ContractVersionsTable holds the schema information for the "contract_versions" table.
+	ContractVersionsTable = &schema.Table{
+		Name:       "contract_versions",
+		Columns:    ContractVersionsColumns,
+		PrimaryKey: []*schema.Column{ContractVersionsColumns[0]},
+	}
+	// CustomersColumns holds the columns for the "customers" table.
+	CustomersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "owner_user_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Size: 120},
+		{Name: "company", Type: field.TypeString, Nullable: true, Size: 160},
+		{Name: "cpf_cnpj", Type: field.TypeString, Size: 20},
+		{Name: "email", Type: field.TypeString, Size: 120},
+		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 30},
+		{Name: "address", Type: field.TypeString, Nullable: true, Size: 300},
+		{Name: "preferred_payment_method", Type: field.TypeString, Default: "pix"},
+		{Name: "financial_status", Type: field.TypeString, Default: "regular"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// CustomersTable holds the schema information for the "customers" table.
+	CustomersTable = &schema.Table{
+		Name:       "customers",
+		Columns:    CustomersColumns,
+		PrimaryKey: []*schema.Column{CustomersColumns[0]},
+	}
 	// GroupsColumns holds the columns for the "groups" table.
 	GroupsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeString},
@@ -21,6 +125,168 @@ var (
 		Name:       "groups",
 		Columns:    GroupsColumns,
 		PrimaryKey: []*schema.Column{GroupsColumns[0]},
+	}
+	// IntegrationWebhookEventsColumns holds the columns for the "integration_webhook_events" table.
+	IntegrationWebhookEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "provider", Type: field.TypeString},
+		{Name: "event_id", Type: field.TypeString},
+		{Name: "signature", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "payload", Type: field.TypeString},
+		{Name: "status", Type: field.TypeString, Default: "processed"},
+		{Name: "received_at", Type: field.TypeTime},
+		{Name: "processed_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// IntegrationWebhookEventsTable holds the schema information for the "integration_webhook_events" table.
+	IntegrationWebhookEventsTable = &schema.Table{
+		Name:       "integration_webhook_events",
+		Columns:    IntegrationWebhookEventsColumns,
+		PrimaryKey: []*schema.Column{IntegrationWebhookEventsColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "integrationwebhookevent_provider_event_id",
+				Unique:  true,
+				Columns: []*schema.Column{IntegrationWebhookEventsColumns[1], IntegrationWebhookEventsColumns[2]},
+			},
+		},
+	}
+	// MilestonesColumns holds the columns for the "milestones" table.
+	MilestonesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "project_id", Type: field.TypeString},
+		{Name: "contract_id", Type: field.TypeString, Nullable: true},
+		{Name: "title", Type: field.TypeString, Size: 200},
+		{Name: "deliverables", Type: field.TypeString, Nullable: true},
+		{Name: "amount_cents", Type: field.TypeUint64, Nullable: true},
+		{Name: "due_date", Type: field.TypeTime, Nullable: true},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// MilestonesTable holds the schema information for the "milestones" table.
+	MilestonesTable = &schema.Table{
+		Name:       "milestones",
+		Columns:    MilestonesColumns,
+		PrimaryKey: []*schema.Column{MilestonesColumns[0]},
+	}
+	// OrdersColumns holds the columns for the "orders" table.
+	OrdersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "saga_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "amount", Type: field.TypeUint64},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// OrdersTable holds the schema information for the "orders" table.
+	OrdersTable = &schema.Table{
+		Name:       "orders",
+		Columns:    OrdersColumns,
+		PrimaryKey: []*schema.Column{OrdersColumns[0]},
+	}
+	// PaymentEvidencesColumns holds the columns for the "payment_evidences" table.
+	PaymentEvidencesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "payment_id", Type: field.TypeString},
+		{Name: "file_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "note", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "tx_hash", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// PaymentEvidencesTable holds the schema information for the "payment_evidences" table.
+	PaymentEvidencesTable = &schema.Table{
+		Name:       "payment_evidences",
+		Columns:    PaymentEvidencesColumns,
+		PrimaryKey: []*schema.Column{PaymentEvidencesColumns[0]},
+	}
+	// PaymentRecordsColumns holds the columns for the "payment_records" table.
+	PaymentRecordsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "charge_id", Type: field.TypeString},
+		{Name: "amount_cents", Type: field.TypeUint64},
+		{Name: "method", Type: field.TypeString, Default: "pix"},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "due_date", Type: field.TypeTime, Nullable: true},
+		{Name: "paid_at", Type: field.TypeTime, Nullable: true},
+		{Name: "receipt_url", Type: field.TypeString, Nullable: true, Size: 500},
+		{Name: "external_id", Type: field.TypeString, Nullable: true},
+		{Name: "tx_hash", Type: field.TypeString, Nullable: true, Size: 256},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// PaymentRecordsTable holds the schema information for the "payment_records" table.
+	PaymentRecordsTable = &schema.Table{
+		Name:       "payment_records",
+		Columns:    PaymentRecordsColumns,
+		PrimaryKey: []*schema.Column{PaymentRecordsColumns[0]},
+	}
+	// ProjectsColumns holds the columns for the "projects" table.
+	ProjectsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "owner_user_id", Type: field.TypeString},
+		{Name: "contract_id", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Size: 200},
+		{Name: "status", Type: field.TypeString, Default: "active"},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ProjectsTable holds the schema information for the "projects" table.
+	ProjectsTable = &schema.Table{
+		Name:       "projects",
+		Columns:    ProjectsColumns,
+		PrimaryKey: []*schema.Column{ProjectsColumns[0]},
+	}
+	// SagaStatesColumns holds the columns for the "saga_states" table.
+	SagaStatesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "saga_type", Type: field.TypeString},
+		{Name: "order_id", Type: field.TypeString},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "amount_cents", Type: field.TypeUint64},
+		{Name: "current_step", Type: field.TypeString, Default: "pending"},
+		{Name: "status", Type: field.TypeString, Default: "pending"},
+		{Name: "idempotency_key", Type: field.TypeString, Unique: true},
+		{Name: "provider_ref", Type: field.TypeString, Nullable: true},
+		{Name: "failure_reason", Type: field.TypeString, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// SagaStatesTable holds the schema information for the "saga_states" table.
+	SagaStatesTable = &schema.Table{
+		Name:       "saga_states",
+		Columns:    SagaStatesColumns,
+		PrimaryKey: []*schema.Column{SagaStatesColumns[0]},
+	}
+	// ServiceContractsColumns holds the columns for the "service_contracts" table.
+	ServiceContractsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "owner_user_id", Type: field.TypeString},
+		{Name: "customer_id", Type: field.TypeString},
+		{Name: "contract_type", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString, Size: 180},
+		{Name: "amount_cents", Type: field.TypeUint64},
+		{Name: "billing_type", Type: field.TypeString, Default: "monthly"},
+		{Name: "status", Type: field.TypeString, Default: "draft"},
+		{Name: "start_date", Type: field.TypeTime},
+		{Name: "end_date", Type: field.TypeTime, Nullable: true},
+		{Name: "duration_months", Type: field.TypeInt, Nullable: true},
+		{Name: "deliverables", Type: field.TypeString, Nullable: true},
+		{Name: "sla", Type: field.TypeString, Nullable: true},
+		{Name: "penalties", Type: field.TypeString, Nullable: true},
+		{Name: "payment_terms", Type: field.TypeString, Nullable: true},
+		{Name: "auto_renew", Type: field.TypeBool, Default: false},
+		{Name: "next_renewal_at", Type: field.TypeTime, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime},
+		{Name: "updated_at", Type: field.TypeTime},
+	}
+	// ServiceContractsTable holds the schema information for the "service_contracts" table.
+	ServiceContractsTable = &schema.Table{
+		Name:       "service_contracts",
+		Columns:    ServiceContractsColumns,
+		PrimaryKey: []*schema.Column{ServiceContractsColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -43,6 +309,23 @@ var (
 		Name:       "users",
 		Columns:    UsersColumns,
 		PrimaryKey: []*schema.Column{UsersColumns[0]},
+	}
+	// WorklogsColumns holds the columns for the "worklogs" table.
+	WorklogsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeString},
+		{Name: "project_id", Type: field.TypeString},
+		{Name: "milestone_id", Type: field.TypeString, Nullable: true},
+		{Name: "user_id", Type: field.TypeString},
+		{Name: "hours", Type: field.TypeFloat64},
+		{Name: "description", Type: field.TypeString, Nullable: true, Size: 1000},
+		{Name: "worked_at", Type: field.TypeTime},
+		{Name: "created_at", Type: field.TypeTime},
+	}
+	// WorklogsTable holds the schema information for the "worklogs" table.
+	WorklogsTable = &schema.Table{
+		Name:       "worklogs",
+		Columns:    WorklogsColumns,
+		PrimaryKey: []*schema.Column{WorklogsColumns[0]},
 	}
 	// GroupUsersColumns holds the columns for the "group_users" table.
 	GroupUsersColumns = []*schema.Column{
@@ -71,8 +354,22 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		AutomationRunsTable,
+		ChargesTable,
+		ContractSignaturesTable,
+		ContractVersionsTable,
+		CustomersTable,
 		GroupsTable,
+		IntegrationWebhookEventsTable,
+		MilestonesTable,
+		OrdersTable,
+		PaymentEvidencesTable,
+		PaymentRecordsTable,
+		ProjectsTable,
+		SagaStatesTable,
+		ServiceContractsTable,
 		UsersTable,
+		WorklogsTable,
 		GroupUsersTable,
 	}
 )

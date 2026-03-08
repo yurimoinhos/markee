@@ -12,8 +12,22 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
+	"github.com/aggi-tech/aggipay/ent/automationrun"
+	"github.com/aggi-tech/aggipay/ent/charge"
+	"github.com/aggi-tech/aggipay/ent/contractsignature"
+	"github.com/aggi-tech/aggipay/ent/contractversion"
+	"github.com/aggi-tech/aggipay/ent/customer"
 	"github.com/aggi-tech/aggipay/ent/group"
+	"github.com/aggi-tech/aggipay/ent/integrationwebhookevent"
+	"github.com/aggi-tech/aggipay/ent/milestone"
+	"github.com/aggi-tech/aggipay/ent/order"
+	"github.com/aggi-tech/aggipay/ent/paymentevidence"
+	"github.com/aggi-tech/aggipay/ent/paymentrecord"
+	"github.com/aggi-tech/aggipay/ent/project"
+	"github.com/aggi-tech/aggipay/ent/sagastate"
+	"github.com/aggi-tech/aggipay/ent/servicecontract"
 	"github.com/aggi-tech/aggipay/ent/user"
+	"github.com/aggi-tech/aggipay/ent/worklog"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -74,8 +88,22 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			group.Table: group.ValidColumn,
-			user.Table:  user.ValidColumn,
+			automationrun.Table:           automationrun.ValidColumn,
+			charge.Table:                  charge.ValidColumn,
+			contractsignature.Table:       contractsignature.ValidColumn,
+			contractversion.Table:         contractversion.ValidColumn,
+			customer.Table:                customer.ValidColumn,
+			group.Table:                   group.ValidColumn,
+			integrationwebhookevent.Table: integrationwebhookevent.ValidColumn,
+			milestone.Table:               milestone.ValidColumn,
+			order.Table:                   order.ValidColumn,
+			paymentevidence.Table:         paymentevidence.ValidColumn,
+			paymentrecord.Table:           paymentrecord.ValidColumn,
+			project.Table:                 project.ValidColumn,
+			sagastate.Table:               sagastate.ValidColumn,
+			servicecontract.Table:         servicecontract.ValidColumn,
+			user.Table:                    user.ValidColumn,
+			worklog.Table:                 worklog.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

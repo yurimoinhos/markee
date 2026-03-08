@@ -9,9 +9,9 @@
     "host": "localhost:8000",
     "basePath": "/api/v1",
     "paths": {
-        "/auth/register": {
+        "/auth/google/callback": {
             "post": {
-                "description": "Cria um novo usuário no sistema",
+                "description": "Troca o authorization code pelo JWT da aplicação usando PKCE. O cliente envia o code recebido do Google, o state e o code_verifier gerados no passo anterior.",
                 "consumes": [
                     "application/json"
                 ],
@@ -21,61 +21,15 @@
                 "tags": [
                     "Auth"
                 ],
-                "summary": "Registrar usuário",
+                "summary": "Finalizar login com Google",
                 "parameters": [
                     {
-                        "description": "Dados do usuário",
+                        "description": "Parâmetros do callback",
                         "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/http.registerRequest"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/domain.User"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
-                        }
-                    }
-                }
-            }
-        },
-        "/auth/token": {
-            "post": {
-                "description": "Gera um JWT para o e-mail informado (autenticação sem senha)",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Auth"
-                ],
-                "summary": "Gerar access token",
-                "parameters": [
-                    {
-                        "description": "E-mail do usuário",
-                        "name": "body",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/http.tokenRequest"
+                            "$ref": "#/definitions/http.oidcCallbackRequest"
                         }
                     }
                 ],
@@ -89,13 +43,167 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/google/login": {
+            "get": {
+                "description": "Retorna a URL de autorização do Google e os parâmetros PKCE. O cliente deve armazenar state e code_verifier, depois redirecionar o usuário para auth_url.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Iniciar login com Google",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.oidcAuthResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/login": {
+            "post": {
+                "description": "Autentica com email e senha, retorna JWT de acesso",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Login local",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "E-mail",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Senha",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.tokenResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/register": {
+            "post": {
+                "description": "Cria um novo usuário com email e senha. Usa criptografia Argon2ID com alto uso de processamento.",
+                "consumes": [
+                    "application/x-www-form-urlencoded"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Registrar usuário",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Primeiro nome",
+                        "name": "firstName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Sobrenome",
+                        "name": "lastName",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "E-mail",
+                        "name": "email",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Telefone",
+                        "name": "phoneNumber",
+                        "in": "formData"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Senha",
+                        "name": "password",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     }
                 }
@@ -134,16 +242,13 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.User"
-                            }
+                            "$ref": "#/definitions/http.userPageResponse"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     }
                 }
@@ -183,13 +288,13 @@
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     }
                 }
@@ -239,19 +344,19 @@
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     }
                 }
@@ -292,13 +397,1274 @@
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/http.errorResponse"
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/automation/run": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Automation"
+                ],
+                "summary": "Executar automações financeiras",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/automation.RunResult"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/automation/runs": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Automation"
+                ],
+                "summary": "Histórico de automações",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/charges": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Listar cobranças",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gera cobrança única, mensal ou por milestone",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Criar cobrança",
+                "parameters": [
+                    {
+                        "description": "Dados da cobrança",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/billing.CreateChargeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/charges/{id}/pay-link": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Obter link de pagamento",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID da cobrança",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/billing.PaymentLinkResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/charges/{id}/pay-qr": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Billing"
+                ],
+                "summary": "Obter QR Code de pagamento",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID da cobrança",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/billing.PaymentQRResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Listar contratos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cadastra contrato de serviço de software",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Criar contrato",
+                "parameters": [
+                    {
+                        "description": "Dados do contrato",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.CreateContractInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Buscar contrato",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do contrato",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/{id}/generate": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Gera artefatos PDF/editável para assinatura",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Gerar versão de contrato",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do contrato",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Template e conteúdo",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.GenerateContractInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/contracts/{id}/send-signature": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cria documento no Clicksign e retorna URL de assinatura",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Contracts"
+                ],
+                "summary": "Enviar para assinatura",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do contrato",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do signatário",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/contracts.SendSignatureInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/customers": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Listar clientes",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Cadastra um cliente para gestão financeira/contratos",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Criar cliente",
+                "parameters": [
+                    {
+                        "description": "Dados do cliente",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/customers.CreateCustomerInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/customers/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Retorna cadastro e resumo financeiro do cliente",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Detalhar cliente",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do cliente",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Customers"
+                ],
+                "summary": "Atualizar cliente",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do cliente",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados para atualização",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/customers.UpdateCustomerInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/finance/cashflow": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Finance"
+                ],
+                "summary": "Fluxo de caixa",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/finance.CashFlowPoint"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/finance/dashboard": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Finance"
+                ],
+                "summary": "Dashboard financeiro",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/finance.Dashboard"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/finance/defaults": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Finance"
+                ],
+                "summary": "Métricas de inadimplência e crescimento",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/finance.DefaultMetrics"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/orders": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Cria um pedido de pagamento",
+                "parameters": [
+                    {
+                        "description": "Dados do pedido",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/http.createOrderRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "description": "Accepted",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/orders/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Orders"
+                ],
+                "summary": "Consulta um pedido pelo ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do pedido",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/payments": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Listar pagamentos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/confirm": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Confirma pagamento manual ou por conciliação externa",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Confirmar pagamento",
+                "parameters": [
+                    {
+                        "description": "Dados do pagamento",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payments.ConfirmPaymentInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/payments/{id}/evidence": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Anexa evidência/comprovante e hash de transação cripto",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payments"
+                ],
+                "summary": "Adicionar comprovante",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do pagamento",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do comprovante",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/payments.EvidenceInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Listar projetos",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "additionalProperties": true
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Criar projeto",
+                "parameters": [
+                    {
+                        "description": "Dados do projeto",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/projects.CreateProjectInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}/milestones": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Criar milestone",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do projeto",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do milestone",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/projects.CreateMilestoneInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/projects/{id}/worklogs": {
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Projects"
+                ],
+                "summary": "Criar worklog",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "ID do projeto",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Dados do worklog",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/projects.CreateWorklogInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/problem.BaseErr"
+                        }
+                    }
+                }
+            }
+        },
+        "/webhooks/asaas": {
+            "post": {
+                "description": "Recebe eventos de cobrança/pagamento do Asaas",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Webhook Asaas",
+                "parameters": [
+                    {
+                        "description": "Evento Asaas",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/webhooks/clicksign": {
+            "post": {
+                "description": "Recebe eventos de assinatura digital do Clicksign",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Webhooks"
+                ],
+                "summary": "Webhook Clicksign",
+                "parameters": [
+                    {
+                        "description": "Evento Clicksign",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
                         }
                     }
                 }
@@ -306,6 +1672,192 @@
         }
     },
     "definitions": {
+        "automation.RunResult": {
+            "type": "object",
+            "properties": {
+                "contracts_near_expiry": {
+                    "type": "integer"
+                },
+                "monthly_report_generated": {
+                    "type": "integer"
+                },
+                "projects_suspended": {
+                    "type": "integer"
+                },
+                "recurring_charges_made": {
+                    "type": "integer"
+                },
+                "reminders_sent": {
+                    "type": "integer"
+                }
+            }
+        },
+        "billing.CreateChargeInput": {
+            "type": "object",
+            "properties": {
+                "amount_cents": {
+                    "type": "integer"
+                },
+                "charge_type": {
+                    "type": "string"
+                },
+                "contract_id": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "milestone_id": {
+                    "type": "string"
+                },
+                "payment_method": {
+                    "type": "string"
+                }
+            }
+        },
+        "billing.PaymentLinkResponse": {
+            "type": "object",
+            "properties": {
+                "charge_id": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                }
+            }
+        },
+        "billing.PaymentQRResponse": {
+            "type": "object",
+            "properties": {
+                "charge_id": {
+                    "type": "string"
+                },
+                "qr_code": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.CreateContractInput": {
+            "type": "object",
+            "properties": {
+                "amount_cents": {
+                    "type": "integer"
+                },
+                "auto_renew": {
+                    "type": "boolean"
+                },
+                "billing_type": {
+                    "type": "string"
+                },
+                "contract_type": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "string"
+                },
+                "deliverables": {
+                    "type": "string"
+                },
+                "duration_months": {
+                    "type": "integer"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "payment_terms": {
+                    "type": "string"
+                },
+                "penalties": {
+                    "type": "string"
+                },
+                "sla": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.GenerateContractInput": {
+            "type": "object",
+            "properties": {
+                "editable_content": {
+                    "type": "string"
+                },
+                "template_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "contracts.SendSignatureInput": {
+            "type": "object",
+            "properties": {
+                "signer_email": {
+                    "type": "string"
+                },
+                "signer_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "customers.CreateCustomerInput": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "cpf_cnpj": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "preferred_payment_method": {
+                    "type": "string"
+                }
+            }
+        },
+        "customers.UpdateCustomerInput": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "company": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "preferred_payment_method": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.User": {
             "type": "object",
             "properties": {
@@ -338,42 +1890,106 @@
                 }
             }
         },
-        "http.errorResponse": {
+        "finance.CashFlowPoint": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string",
-                    "example": "mensagem de erro"
+                "date": {
+                    "type": "string"
+                },
+                "in_cents": {
+                    "type": "integer"
+                },
+                "pending_cents": {
+                    "type": "integer"
                 }
             }
         },
-        "http.registerRequest": {
+        "finance.Dashboard": {
             "type": "object",
             "properties": {
-                "email": {
-                    "type": "string",
-                    "example": "yuri@example.com"
+                "active_contracts": {
+                    "type": "integer"
                 },
-                "firstName": {
-                    "type": "string",
-                    "example": "Yuri"
+                "expiring_contracts": {
+                    "type": "integer"
                 },
-                "lastName": {
-                    "type": "string",
-                    "example": "Moinhos"
+                "monthly_revenue_cents": {
+                    "type": "integer"
                 },
-                "phoneNumber": {
-                    "type": "string",
-                    "example": "11999999999"
+                "mrr_cents": {
+                    "type": "integer"
+                },
+                "payments_received": {
+                    "type": "integer"
+                },
+                "pending_payments": {
+                    "type": "integer"
                 }
             }
         },
-        "http.tokenRequest": {
+        "finance.DefaultMetrics": {
             "type": "object",
             "properties": {
-                "email": {
+                "default_rate_percent": {
+                    "type": "number"
+                },
+                "growth_percent": {
+                    "type": "number"
+                },
+                "overdue_charges": {
+                    "type": "integer"
+                }
+            }
+        },
+        "http.createOrderRequest": {
+            "type": "object",
+            "required": [
+                "user_id"
+            ],
+            "properties": {
+                "amount_cents": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "description": {
+                    "type": "string"
+                },
+                "user_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "http.oidcAuthResponse": {
+            "type": "object",
+            "properties": {
+                "auth_url": {
                     "type": "string",
-                    "example": "yuri@example.com"
+                    "example": "https://accounts.google.com/o/oauth2/auth?..."
+                },
+                "code_verifier": {
+                    "type": "string",
+                    "example": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+                },
+                "state": {
+                    "type": "string",
+                    "example": "eyJhbGci..."
+                }
+            }
+        },
+        "http.oidcCallbackRequest": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "example": "4/0AX4XfWi..."
+                },
+                "code_verifier": {
+                    "type": "string",
+                    "example": "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+                },
+                "state": {
+                    "type": "string",
+                    "example": "eyJhbGci..."
                 }
             }
         },
@@ -395,15 +2011,155 @@
             "properties": {
                 "firstName": {
                     "type": "string",
-                    "example": "Yuri"
+                    "example": "João"
                 },
                 "lastName": {
                     "type": "string",
-                    "example": "Moinhos"
+                    "example": "Silva"
                 },
                 "phoneNumber": {
                     "type": "string",
                     "example": "11999999999"
+                }
+            }
+        },
+        "http.userPageResponse": {
+            "type": "object",
+            "properties": {
+                "items": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/domain.User"
+                    }
+                },
+                "page": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                },
+                "totalPages": {
+                    "type": "integer"
+                }
+            }
+        },
+        "payments.ConfirmPaymentInput": {
+            "type": "object",
+            "properties": {
+                "amount_cents": {
+                    "type": "integer"
+                },
+                "charge_id": {
+                    "type": "string"
+                },
+                "method": {
+                    "type": "string"
+                },
+                "paid_at": {
+                    "type": "string"
+                },
+                "receipt_url": {
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "payments.EvidenceInput": {
+            "type": "object",
+            "properties": {
+                "file_url": {
+                    "type": "string"
+                },
+                "note": {
+                    "type": "string"
+                },
+                "tx_hash": {
+                    "type": "string"
+                }
+            }
+        },
+        "problem.BaseErr": {
+            "type": "object",
+            "properties": {
+                "details": {
+                    "description": "Details contém informações adicionais opcionais sobre o erro."
+                },
+                "error": {
+                    "description": "Title é o título legível do tipo de problema.",
+                    "type": "string"
+                },
+                "errorDescription": {
+                    "description": "ErrorDescription é uma explicação específica desta ocorrência.",
+                    "type": "string"
+                },
+                "instance": {
+                    "description": "Instance é o URI da requisição que originou o erro.",
+                    "type": "string"
+                },
+                "statusCode": {
+                    "description": "StatusCode é o código HTTP associado ao problema.",
+                    "type": "integer"
+                },
+                "timestamp": {
+                    "description": "Timestamp indica quando o erro ocorreu (UTC, ISO 8601).",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "Type é um URI que identifica o tipo do problema (único por categoria de erro).",
+                    "type": "string"
+                }
+            }
+        },
+        "projects.CreateMilestoneInput": {
+            "type": "object",
+            "properties": {
+                "amount_cents": {
+                    "type": "integer"
+                },
+                "contract_id": {
+                    "type": "string"
+                },
+                "deliverables": {
+                    "type": "string"
+                },
+                "due_date": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
+        "projects.CreateProjectInput": {
+            "type": "object",
+            "properties": {
+                "contract_id": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "projects.CreateWorklogInput": {
+            "type": "object",
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "hours": {
+                    "type": "number"
+                },
+                "milestone_id": {
+                    "type": "string"
+                },
+                "worked_at": {
+                    "type": "string"
                 }
             }
         }

@@ -5,15 +5,305 @@ package ent
 import (
 	"time"
 
+	"github.com/aggi-tech/aggipay/ent/automationrun"
+	"github.com/aggi-tech/aggipay/ent/charge"
+	"github.com/aggi-tech/aggipay/ent/contractsignature"
+	"github.com/aggi-tech/aggipay/ent/contractversion"
+	"github.com/aggi-tech/aggipay/ent/customer"
 	"github.com/aggi-tech/aggipay/ent/group"
+	"github.com/aggi-tech/aggipay/ent/integrationwebhookevent"
+	"github.com/aggi-tech/aggipay/ent/milestone"
+	"github.com/aggi-tech/aggipay/ent/order"
+	"github.com/aggi-tech/aggipay/ent/paymentevidence"
+	"github.com/aggi-tech/aggipay/ent/paymentrecord"
+	"github.com/aggi-tech/aggipay/ent/project"
+	"github.com/aggi-tech/aggipay/ent/sagastate"
 	"github.com/aggi-tech/aggipay/ent/schema"
+	"github.com/aggi-tech/aggipay/ent/servicecontract"
 	"github.com/aggi-tech/aggipay/ent/user"
+	"github.com/aggi-tech/aggipay/ent/worklog"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	automationrunFields := schema.AutomationRun{}.Fields()
+	_ = automationrunFields
+	// automationrunDescOwnerUserID is the schema descriptor for owner_user_id field.
+	automationrunDescOwnerUserID := automationrunFields[1].Descriptor()
+	// automationrun.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	automationrun.OwnerUserIDValidator = automationrunDescOwnerUserID.Validators[0].(func(string) error)
+	// automationrunDescAutomationType is the schema descriptor for automation_type field.
+	automationrunDescAutomationType := automationrunFields[2].Descriptor()
+	// automationrun.AutomationTypeValidator is a validator for the "automation_type" field. It is called by the builders before save.
+	automationrun.AutomationTypeValidator = automationrunDescAutomationType.Validators[0].(func(string) error)
+	// automationrunDescStatus is the schema descriptor for status field.
+	automationrunDescStatus := automationrunFields[3].Descriptor()
+	// automationrun.DefaultStatus holds the default value on creation for the status field.
+	automationrun.DefaultStatus = automationrunDescStatus.Default.(string)
+	// automationrun.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	automationrun.StatusValidator = automationrunDescStatus.Validators[0].(func(string) error)
+	// automationrunDescRanAt is the schema descriptor for ran_at field.
+	automationrunDescRanAt := automationrunFields[5].Descriptor()
+	// automationrun.DefaultRanAt holds the default value on creation for the ran_at field.
+	automationrun.DefaultRanAt = automationrunDescRanAt.Default.(func() time.Time)
+	// automationrunDescCreatedAt is the schema descriptor for created_at field.
+	automationrunDescCreatedAt := automationrunFields[6].Descriptor()
+	// automationrun.DefaultCreatedAt holds the default value on creation for the created_at field.
+	automationrun.DefaultCreatedAt = automationrunDescCreatedAt.Default.(func() time.Time)
+	// automationrunDescID is the schema descriptor for id field.
+	automationrunDescID := automationrunFields[0].Descriptor()
+	// automationrun.DefaultID holds the default value on creation for the id field.
+	automationrun.DefaultID = automationrunDescID.Default.(func() string)
+	chargeFields := schema.Charge{}.Fields()
+	_ = chargeFields
+	// chargeDescOwnerUserID is the schema descriptor for owner_user_id field.
+	chargeDescOwnerUserID := chargeFields[1].Descriptor()
+	// charge.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	charge.OwnerUserIDValidator = chargeDescOwnerUserID.Validators[0].(func(string) error)
+	// chargeDescCustomerID is the schema descriptor for customer_id field.
+	chargeDescCustomerID := chargeFields[2].Descriptor()
+	// charge.CustomerIDValidator is a validator for the "customer_id" field. It is called by the builders before save.
+	charge.CustomerIDValidator = chargeDescCustomerID.Validators[0].(func(string) error)
+	// chargeDescChargeType is the schema descriptor for charge_type field.
+	chargeDescChargeType := chargeFields[5].Descriptor()
+	// charge.DefaultChargeType holds the default value on creation for the charge_type field.
+	charge.DefaultChargeType = chargeDescChargeType.Default.(string)
+	// charge.ChargeTypeValidator is a validator for the "charge_type" field. It is called by the builders before save.
+	charge.ChargeTypeValidator = chargeDescChargeType.Validators[0].(func(string) error)
+	// chargeDescAmountCents is the schema descriptor for amount_cents field.
+	chargeDescAmountCents := chargeFields[6].Descriptor()
+	// charge.AmountCentsValidator is a validator for the "amount_cents" field. It is called by the builders before save.
+	charge.AmountCentsValidator = chargeDescAmountCents.Validators[0].(func(uint64) error)
+	// chargeDescCurrency is the schema descriptor for currency field.
+	chargeDescCurrency := chargeFields[7].Descriptor()
+	// charge.DefaultCurrency holds the default value on creation for the currency field.
+	charge.DefaultCurrency = chargeDescCurrency.Default.(string)
+	// chargeDescPaymentMethod is the schema descriptor for payment_method field.
+	chargeDescPaymentMethod := chargeFields[8].Descriptor()
+	// charge.DefaultPaymentMethod holds the default value on creation for the payment_method field.
+	charge.DefaultPaymentMethod = chargeDescPaymentMethod.Default.(string)
+	// charge.PaymentMethodValidator is a validator for the "payment_method" field. It is called by the builders before save.
+	charge.PaymentMethodValidator = chargeDescPaymentMethod.Validators[0].(func(string) error)
+	// chargeDescStatus is the schema descriptor for status field.
+	chargeDescStatus := chargeFields[9].Descriptor()
+	// charge.DefaultStatus holds the default value on creation for the status field.
+	charge.DefaultStatus = chargeDescStatus.Default.(string)
+	// charge.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	charge.StatusValidator = chargeDescStatus.Validators[0].(func(string) error)
+	// chargeDescDueDate is the schema descriptor for due_date field.
+	chargeDescDueDate := chargeFields[10].Descriptor()
+	// charge.DefaultDueDate holds the default value on creation for the due_date field.
+	charge.DefaultDueDate = chargeDescDueDate.Default.(func() time.Time)
+	// chargeDescPaymentLink is the schema descriptor for payment_link field.
+	chargeDescPaymentLink := chargeFields[13].Descriptor()
+	// charge.PaymentLinkValidator is a validator for the "payment_link" field. It is called by the builders before save.
+	charge.PaymentLinkValidator = chargeDescPaymentLink.Validators[0].(func(string) error)
+	// chargeDescDescription is the schema descriptor for description field.
+	chargeDescDescription := chargeFields[15].Descriptor()
+	// charge.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	charge.DescriptionValidator = chargeDescDescription.Validators[0].(func(string) error)
+	// chargeDescCreatedAt is the schema descriptor for created_at field.
+	chargeDescCreatedAt := chargeFields[16].Descriptor()
+	// charge.DefaultCreatedAt holds the default value on creation for the created_at field.
+	charge.DefaultCreatedAt = chargeDescCreatedAt.Default.(func() time.Time)
+	// chargeDescUpdatedAt is the schema descriptor for updated_at field.
+	chargeDescUpdatedAt := chargeFields[17].Descriptor()
+	// charge.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	charge.DefaultUpdatedAt = chargeDescUpdatedAt.Default.(func() time.Time)
+	// charge.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	charge.UpdateDefaultUpdatedAt = chargeDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// chargeDescID is the schema descriptor for id field.
+	chargeDescID := chargeFields[0].Descriptor()
+	// charge.DefaultID holds the default value on creation for the id field.
+	charge.DefaultID = chargeDescID.Default.(func() string)
+	contractsignatureFields := schema.ContractSignature{}.Fields()
+	_ = contractsignatureFields
+	// contractsignatureDescContractID is the schema descriptor for contract_id field.
+	contractsignatureDescContractID := contractsignatureFields[1].Descriptor()
+	// contractsignature.ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
+	contractsignature.ContractIDValidator = contractsignatureDescContractID.Validators[0].(func(string) error)
+	// contractsignatureDescProvider is the schema descriptor for provider field.
+	contractsignatureDescProvider := contractsignatureFields[3].Descriptor()
+	// contractsignature.DefaultProvider holds the default value on creation for the provider field.
+	contractsignature.DefaultProvider = contractsignatureDescProvider.Default.(string)
+	// contractsignature.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	contractsignature.ProviderValidator = contractsignatureDescProvider.Validators[0].(func(string) error)
+	// contractsignatureDescStatus is the schema descriptor for status field.
+	contractsignatureDescStatus := contractsignatureFields[5].Descriptor()
+	// contractsignature.DefaultStatus holds the default value on creation for the status field.
+	contractsignature.DefaultStatus = contractsignatureDescStatus.Default.(string)
+	// contractsignature.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	contractsignature.StatusValidator = contractsignatureDescStatus.Validators[0].(func(string) error)
+	// contractsignatureDescAcceptedIP is the schema descriptor for accepted_ip field.
+	contractsignatureDescAcceptedIP := contractsignatureFields[9].Descriptor()
+	// contractsignature.AcceptedIPValidator is a validator for the "accepted_ip" field. It is called by the builders before save.
+	contractsignature.AcceptedIPValidator = contractsignatureDescAcceptedIP.Validators[0].(func(string) error)
+	// contractsignatureDescCreatedAt is the schema descriptor for created_at field.
+	contractsignatureDescCreatedAt := contractsignatureFields[11].Descriptor()
+	// contractsignature.DefaultCreatedAt holds the default value on creation for the created_at field.
+	contractsignature.DefaultCreatedAt = contractsignatureDescCreatedAt.Default.(func() time.Time)
+	// contractsignatureDescUpdatedAt is the schema descriptor for updated_at field.
+	contractsignatureDescUpdatedAt := contractsignatureFields[12].Descriptor()
+	// contractsignature.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	contractsignature.DefaultUpdatedAt = contractsignatureDescUpdatedAt.Default.(func() time.Time)
+	// contractsignature.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	contractsignature.UpdateDefaultUpdatedAt = contractsignatureDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// contractsignatureDescID is the schema descriptor for id field.
+	contractsignatureDescID := contractsignatureFields[0].Descriptor()
+	// contractsignature.DefaultID holds the default value on creation for the id field.
+	contractsignature.DefaultID = contractsignatureDescID.Default.(func() string)
+	contractversionFields := schema.ContractVersion{}.Fields()
+	_ = contractversionFields
+	// contractversionDescContractID is the schema descriptor for contract_id field.
+	contractversionDescContractID := contractversionFields[1].Descriptor()
+	// contractversion.ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
+	contractversion.ContractIDValidator = contractversionDescContractID.Validators[0].(func(string) error)
+	// contractversionDescVersion is the schema descriptor for version field.
+	contractversionDescVersion := contractversionFields[2].Descriptor()
+	// contractversion.VersionValidator is a validator for the "version" field. It is called by the builders before save.
+	contractversion.VersionValidator = contractversionDescVersion.Validators[0].(func(int) error)
+	// contractversionDescTemplateName is the schema descriptor for template_name field.
+	contractversionDescTemplateName := contractversionFields[3].Descriptor()
+	// contractversion.TemplateNameValidator is a validator for the "template_name" field. It is called by the builders before save.
+	contractversion.TemplateNameValidator = func() func(string) error {
+		validators := contractversionDescTemplateName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(template_name string) error {
+			for _, fn := range fns {
+				if err := fn(template_name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// contractversionDescEditableContent is the schema descriptor for editable_content field.
+	contractversionDescEditableContent := contractversionFields[4].Descriptor()
+	// contractversion.EditableContentValidator is a validator for the "editable_content" field. It is called by the builders before save.
+	contractversion.EditableContentValidator = contractversionDescEditableContent.Validators[0].(func(string) error)
+	// contractversionDescPdfURL is the schema descriptor for pdf_url field.
+	contractversionDescPdfURL := contractversionFields[5].Descriptor()
+	// contractversion.PdfURLValidator is a validator for the "pdf_url" field. It is called by the builders before save.
+	contractversion.PdfURLValidator = contractversionDescPdfURL.Validators[0].(func(string) error)
+	// contractversionDescEditableURL is the schema descriptor for editable_url field.
+	contractversionDescEditableURL := contractversionFields[6].Descriptor()
+	// contractversion.EditableURLValidator is a validator for the "editable_url" field. It is called by the builders before save.
+	contractversion.EditableURLValidator = contractversionDescEditableURL.Validators[0].(func(string) error)
+	// contractversionDescGeneratedAt is the schema descriptor for generated_at field.
+	contractversionDescGeneratedAt := contractversionFields[7].Descriptor()
+	// contractversion.DefaultGeneratedAt holds the default value on creation for the generated_at field.
+	contractversion.DefaultGeneratedAt = contractversionDescGeneratedAt.Default.(func() time.Time)
+	// contractversionDescCreatedAt is the schema descriptor for created_at field.
+	contractversionDescCreatedAt := contractversionFields[8].Descriptor()
+	// contractversion.DefaultCreatedAt holds the default value on creation for the created_at field.
+	contractversion.DefaultCreatedAt = contractversionDescCreatedAt.Default.(func() time.Time)
+	// contractversionDescID is the schema descriptor for id field.
+	contractversionDescID := contractversionFields[0].Descriptor()
+	// contractversion.DefaultID holds the default value on creation for the id field.
+	contractversion.DefaultID = contractversionDescID.Default.(func() string)
+	customerFields := schema.Customer{}.Fields()
+	_ = customerFields
+	// customerDescOwnerUserID is the schema descriptor for owner_user_id field.
+	customerDescOwnerUserID := customerFields[1].Descriptor()
+	// customer.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	customer.OwnerUserIDValidator = customerDescOwnerUserID.Validators[0].(func(string) error)
+	// customerDescName is the schema descriptor for name field.
+	customerDescName := customerFields[2].Descriptor()
+	// customer.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	customer.NameValidator = func() func(string) error {
+		validators := customerDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// customerDescCompany is the schema descriptor for company field.
+	customerDescCompany := customerFields[3].Descriptor()
+	// customer.CompanyValidator is a validator for the "company" field. It is called by the builders before save.
+	customer.CompanyValidator = customerDescCompany.Validators[0].(func(string) error)
+	// customerDescCpfCnpj is the schema descriptor for cpf_cnpj field.
+	customerDescCpfCnpj := customerFields[4].Descriptor()
+	// customer.CpfCnpjValidator is a validator for the "cpf_cnpj" field. It is called by the builders before save.
+	customer.CpfCnpjValidator = func() func(string) error {
+		validators := customerDescCpfCnpj.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(cpf_cnpj string) error {
+			for _, fn := range fns {
+				if err := fn(cpf_cnpj); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// customerDescEmail is the schema descriptor for email field.
+	customerDescEmail := customerFields[5].Descriptor()
+	// customer.EmailValidator is a validator for the "email" field. It is called by the builders before save.
+	customer.EmailValidator = func() func(string) error {
+		validators := customerDescEmail.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(email string) error {
+			for _, fn := range fns {
+				if err := fn(email); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// customerDescPhone is the schema descriptor for phone field.
+	customerDescPhone := customerFields[6].Descriptor()
+	// customer.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
+	customer.PhoneValidator = customerDescPhone.Validators[0].(func(string) error)
+	// customerDescAddress is the schema descriptor for address field.
+	customerDescAddress := customerFields[7].Descriptor()
+	// customer.AddressValidator is a validator for the "address" field. It is called by the builders before save.
+	customer.AddressValidator = customerDescAddress.Validators[0].(func(string) error)
+	// customerDescPreferredPaymentMethod is the schema descriptor for preferred_payment_method field.
+	customerDescPreferredPaymentMethod := customerFields[8].Descriptor()
+	// customer.DefaultPreferredPaymentMethod holds the default value on creation for the preferred_payment_method field.
+	customer.DefaultPreferredPaymentMethod = customerDescPreferredPaymentMethod.Default.(string)
+	// customer.PreferredPaymentMethodValidator is a validator for the "preferred_payment_method" field. It is called by the builders before save.
+	customer.PreferredPaymentMethodValidator = customerDescPreferredPaymentMethod.Validators[0].(func(string) error)
+	// customerDescFinancialStatus is the schema descriptor for financial_status field.
+	customerDescFinancialStatus := customerFields[9].Descriptor()
+	// customer.DefaultFinancialStatus holds the default value on creation for the financial_status field.
+	customer.DefaultFinancialStatus = customerDescFinancialStatus.Default.(string)
+	// customer.FinancialStatusValidator is a validator for the "financial_status" field. It is called by the builders before save.
+	customer.FinancialStatusValidator = customerDescFinancialStatus.Validators[0].(func(string) error)
+	// customerDescCreatedAt is the schema descriptor for created_at field.
+	customerDescCreatedAt := customerFields[10].Descriptor()
+	// customer.DefaultCreatedAt holds the default value on creation for the created_at field.
+	customer.DefaultCreatedAt = customerDescCreatedAt.Default.(func() time.Time)
+	// customerDescUpdatedAt is the schema descriptor for updated_at field.
+	customerDescUpdatedAt := customerFields[11].Descriptor()
+	// customer.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	customer.DefaultUpdatedAt = customerDescUpdatedAt.Default.(func() time.Time)
+	// customer.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	customer.UpdateDefaultUpdatedAt = customerDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// customerDescID is the schema descriptor for id field.
+	customerDescID := customerFields[0].Descriptor()
+	// customer.DefaultID holds the default value on creation for the id field.
+	customer.DefaultID = customerDescID.Default.(func() string)
 	groupFields := schema.Group{}.Fields()
 	_ = groupFields
 	// groupDescName is the schema descriptor for name field.
@@ -53,6 +343,356 @@ func init() {
 	groupDescID := groupFields[0].Descriptor()
 	// group.DefaultID holds the default value on creation for the id field.
 	group.DefaultID = groupDescID.Default.(func() string)
+	integrationwebhookeventFields := schema.IntegrationWebhookEvent{}.Fields()
+	_ = integrationwebhookeventFields
+	// integrationwebhookeventDescProvider is the schema descriptor for provider field.
+	integrationwebhookeventDescProvider := integrationwebhookeventFields[1].Descriptor()
+	// integrationwebhookevent.ProviderValidator is a validator for the "provider" field. It is called by the builders before save.
+	integrationwebhookevent.ProviderValidator = integrationwebhookeventDescProvider.Validators[0].(func(string) error)
+	// integrationwebhookeventDescEventID is the schema descriptor for event_id field.
+	integrationwebhookeventDescEventID := integrationwebhookeventFields[2].Descriptor()
+	// integrationwebhookevent.EventIDValidator is a validator for the "event_id" field. It is called by the builders before save.
+	integrationwebhookevent.EventIDValidator = integrationwebhookeventDescEventID.Validators[0].(func(string) error)
+	// integrationwebhookeventDescSignature is the schema descriptor for signature field.
+	integrationwebhookeventDescSignature := integrationwebhookeventFields[3].Descriptor()
+	// integrationwebhookevent.SignatureValidator is a validator for the "signature" field. It is called by the builders before save.
+	integrationwebhookevent.SignatureValidator = integrationwebhookeventDescSignature.Validators[0].(func(string) error)
+	// integrationwebhookeventDescPayload is the schema descriptor for payload field.
+	integrationwebhookeventDescPayload := integrationwebhookeventFields[4].Descriptor()
+	// integrationwebhookevent.PayloadValidator is a validator for the "payload" field. It is called by the builders before save.
+	integrationwebhookevent.PayloadValidator = integrationwebhookeventDescPayload.Validators[0].(func(string) error)
+	// integrationwebhookeventDescStatus is the schema descriptor for status field.
+	integrationwebhookeventDescStatus := integrationwebhookeventFields[5].Descriptor()
+	// integrationwebhookevent.DefaultStatus holds the default value on creation for the status field.
+	integrationwebhookevent.DefaultStatus = integrationwebhookeventDescStatus.Default.(string)
+	// integrationwebhookevent.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	integrationwebhookevent.StatusValidator = integrationwebhookeventDescStatus.Validators[0].(func(string) error)
+	// integrationwebhookeventDescReceivedAt is the schema descriptor for received_at field.
+	integrationwebhookeventDescReceivedAt := integrationwebhookeventFields[6].Descriptor()
+	// integrationwebhookevent.DefaultReceivedAt holds the default value on creation for the received_at field.
+	integrationwebhookevent.DefaultReceivedAt = integrationwebhookeventDescReceivedAt.Default.(func() time.Time)
+	// integrationwebhookeventDescCreatedAt is the schema descriptor for created_at field.
+	integrationwebhookeventDescCreatedAt := integrationwebhookeventFields[8].Descriptor()
+	// integrationwebhookevent.DefaultCreatedAt holds the default value on creation for the created_at field.
+	integrationwebhookevent.DefaultCreatedAt = integrationwebhookeventDescCreatedAt.Default.(func() time.Time)
+	// integrationwebhookeventDescID is the schema descriptor for id field.
+	integrationwebhookeventDescID := integrationwebhookeventFields[0].Descriptor()
+	// integrationwebhookevent.DefaultID holds the default value on creation for the id field.
+	integrationwebhookevent.DefaultID = integrationwebhookeventDescID.Default.(func() string)
+	milestoneFields := schema.Milestone{}.Fields()
+	_ = milestoneFields
+	// milestoneDescProjectID is the schema descriptor for project_id field.
+	milestoneDescProjectID := milestoneFields[1].Descriptor()
+	// milestone.ProjectIDValidator is a validator for the "project_id" field. It is called by the builders before save.
+	milestone.ProjectIDValidator = milestoneDescProjectID.Validators[0].(func(string) error)
+	// milestoneDescTitle is the schema descriptor for title field.
+	milestoneDescTitle := milestoneFields[3].Descriptor()
+	// milestone.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	milestone.TitleValidator = func() func(string) error {
+		validators := milestoneDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// milestoneDescStatus is the schema descriptor for status field.
+	milestoneDescStatus := milestoneFields[7].Descriptor()
+	// milestone.DefaultStatus holds the default value on creation for the status field.
+	milestone.DefaultStatus = milestoneDescStatus.Default.(string)
+	// milestone.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	milestone.StatusValidator = milestoneDescStatus.Validators[0].(func(string) error)
+	// milestoneDescCreatedAt is the schema descriptor for created_at field.
+	milestoneDescCreatedAt := milestoneFields[8].Descriptor()
+	// milestone.DefaultCreatedAt holds the default value on creation for the created_at field.
+	milestone.DefaultCreatedAt = milestoneDescCreatedAt.Default.(func() time.Time)
+	// milestoneDescUpdatedAt is the schema descriptor for updated_at field.
+	milestoneDescUpdatedAt := milestoneFields[9].Descriptor()
+	// milestone.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	milestone.DefaultUpdatedAt = milestoneDescUpdatedAt.Default.(func() time.Time)
+	// milestone.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	milestone.UpdateDefaultUpdatedAt = milestoneDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// milestoneDescID is the schema descriptor for id field.
+	milestoneDescID := milestoneFields[0].Descriptor()
+	// milestone.DefaultID holds the default value on creation for the id field.
+	milestone.DefaultID = milestoneDescID.Default.(func() string)
+	orderFields := schema.Order{}.Fields()
+	_ = orderFields
+	// orderDescSagaID is the schema descriptor for saga_id field.
+	orderDescSagaID := orderFields[1].Descriptor()
+	// order.SagaIDValidator is a validator for the "saga_id" field. It is called by the builders before save.
+	order.SagaIDValidator = orderDescSagaID.Validators[0].(func(string) error)
+	// orderDescUserID is the schema descriptor for user_id field.
+	orderDescUserID := orderFields[2].Descriptor()
+	// order.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	order.UserIDValidator = orderDescUserID.Validators[0].(func(string) error)
+	// orderDescAmount is the schema descriptor for amount field.
+	orderDescAmount := orderFields[3].Descriptor()
+	// order.AmountValidator is a validator for the "amount" field. It is called by the builders before save.
+	order.AmountValidator = orderDescAmount.Validators[0].(func(uint64) error)
+	// orderDescStatus is the schema descriptor for status field.
+	orderDescStatus := orderFields[4].Descriptor()
+	// order.DefaultStatus holds the default value on creation for the status field.
+	order.DefaultStatus = orderDescStatus.Default.(string)
+	// order.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	order.StatusValidator = orderDescStatus.Validators[0].(func(string) error)
+	// orderDescDescription is the schema descriptor for description field.
+	orderDescDescription := orderFields[5].Descriptor()
+	// order.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	order.DescriptionValidator = orderDescDescription.Validators[0].(func(string) error)
+	// orderDescCreatedAt is the schema descriptor for created_at field.
+	orderDescCreatedAt := orderFields[6].Descriptor()
+	// order.DefaultCreatedAt holds the default value on creation for the created_at field.
+	order.DefaultCreatedAt = orderDescCreatedAt.Default.(func() time.Time)
+	// orderDescUpdatedAt is the schema descriptor for updated_at field.
+	orderDescUpdatedAt := orderFields[7].Descriptor()
+	// order.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	order.DefaultUpdatedAt = orderDescUpdatedAt.Default.(func() time.Time)
+	// order.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	order.UpdateDefaultUpdatedAt = orderDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// orderDescID is the schema descriptor for id field.
+	orderDescID := orderFields[0].Descriptor()
+	// order.DefaultID holds the default value on creation for the id field.
+	order.DefaultID = orderDescID.Default.(func() string)
+	paymentevidenceFields := schema.PaymentEvidence{}.Fields()
+	_ = paymentevidenceFields
+	// paymentevidenceDescPaymentID is the schema descriptor for payment_id field.
+	paymentevidenceDescPaymentID := paymentevidenceFields[1].Descriptor()
+	// paymentevidence.PaymentIDValidator is a validator for the "payment_id" field. It is called by the builders before save.
+	paymentevidence.PaymentIDValidator = paymentevidenceDescPaymentID.Validators[0].(func(string) error)
+	// paymentevidenceDescFileURL is the schema descriptor for file_url field.
+	paymentevidenceDescFileURL := paymentevidenceFields[2].Descriptor()
+	// paymentevidence.FileURLValidator is a validator for the "file_url" field. It is called by the builders before save.
+	paymentevidence.FileURLValidator = paymentevidenceDescFileURL.Validators[0].(func(string) error)
+	// paymentevidenceDescNote is the schema descriptor for note field.
+	paymentevidenceDescNote := paymentevidenceFields[3].Descriptor()
+	// paymentevidence.NoteValidator is a validator for the "note" field. It is called by the builders before save.
+	paymentevidence.NoteValidator = paymentevidenceDescNote.Validators[0].(func(string) error)
+	// paymentevidenceDescTxHash is the schema descriptor for tx_hash field.
+	paymentevidenceDescTxHash := paymentevidenceFields[4].Descriptor()
+	// paymentevidence.TxHashValidator is a validator for the "tx_hash" field. It is called by the builders before save.
+	paymentevidence.TxHashValidator = paymentevidenceDescTxHash.Validators[0].(func(string) error)
+	// paymentevidenceDescCreatedAt is the schema descriptor for created_at field.
+	paymentevidenceDescCreatedAt := paymentevidenceFields[5].Descriptor()
+	// paymentevidence.DefaultCreatedAt holds the default value on creation for the created_at field.
+	paymentevidence.DefaultCreatedAt = paymentevidenceDescCreatedAt.Default.(func() time.Time)
+	// paymentevidenceDescID is the schema descriptor for id field.
+	paymentevidenceDescID := paymentevidenceFields[0].Descriptor()
+	// paymentevidence.DefaultID holds the default value on creation for the id field.
+	paymentevidence.DefaultID = paymentevidenceDescID.Default.(func() string)
+	paymentrecordFields := schema.PaymentRecord{}.Fields()
+	_ = paymentrecordFields
+	// paymentrecordDescChargeID is the schema descriptor for charge_id field.
+	paymentrecordDescChargeID := paymentrecordFields[1].Descriptor()
+	// paymentrecord.ChargeIDValidator is a validator for the "charge_id" field. It is called by the builders before save.
+	paymentrecord.ChargeIDValidator = paymentrecordDescChargeID.Validators[0].(func(string) error)
+	// paymentrecordDescAmountCents is the schema descriptor for amount_cents field.
+	paymentrecordDescAmountCents := paymentrecordFields[2].Descriptor()
+	// paymentrecord.AmountCentsValidator is a validator for the "amount_cents" field. It is called by the builders before save.
+	paymentrecord.AmountCentsValidator = paymentrecordDescAmountCents.Validators[0].(func(uint64) error)
+	// paymentrecordDescMethod is the schema descriptor for method field.
+	paymentrecordDescMethod := paymentrecordFields[3].Descriptor()
+	// paymentrecord.DefaultMethod holds the default value on creation for the method field.
+	paymentrecord.DefaultMethod = paymentrecordDescMethod.Default.(string)
+	// paymentrecordDescStatus is the schema descriptor for status field.
+	paymentrecordDescStatus := paymentrecordFields[4].Descriptor()
+	// paymentrecord.DefaultStatus holds the default value on creation for the status field.
+	paymentrecord.DefaultStatus = paymentrecordDescStatus.Default.(string)
+	// paymentrecord.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	paymentrecord.StatusValidator = paymentrecordDescStatus.Validators[0].(func(string) error)
+	// paymentrecordDescReceiptURL is the schema descriptor for receipt_url field.
+	paymentrecordDescReceiptURL := paymentrecordFields[7].Descriptor()
+	// paymentrecord.ReceiptURLValidator is a validator for the "receipt_url" field. It is called by the builders before save.
+	paymentrecord.ReceiptURLValidator = paymentrecordDescReceiptURL.Validators[0].(func(string) error)
+	// paymentrecordDescTxHash is the schema descriptor for tx_hash field.
+	paymentrecordDescTxHash := paymentrecordFields[9].Descriptor()
+	// paymentrecord.TxHashValidator is a validator for the "tx_hash" field. It is called by the builders before save.
+	paymentrecord.TxHashValidator = paymentrecordDescTxHash.Validators[0].(func(string) error)
+	// paymentrecordDescCreatedAt is the schema descriptor for created_at field.
+	paymentrecordDescCreatedAt := paymentrecordFields[10].Descriptor()
+	// paymentrecord.DefaultCreatedAt holds the default value on creation for the created_at field.
+	paymentrecord.DefaultCreatedAt = paymentrecordDescCreatedAt.Default.(func() time.Time)
+	// paymentrecordDescUpdatedAt is the schema descriptor for updated_at field.
+	paymentrecordDescUpdatedAt := paymentrecordFields[11].Descriptor()
+	// paymentrecord.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	paymentrecord.DefaultUpdatedAt = paymentrecordDescUpdatedAt.Default.(func() time.Time)
+	// paymentrecord.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	paymentrecord.UpdateDefaultUpdatedAt = paymentrecordDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// paymentrecordDescID is the schema descriptor for id field.
+	paymentrecordDescID := paymentrecordFields[0].Descriptor()
+	// paymentrecord.DefaultID holds the default value on creation for the id field.
+	paymentrecord.DefaultID = paymentrecordDescID.Default.(func() string)
+	projectFields := schema.Project{}.Fields()
+	_ = projectFields
+	// projectDescOwnerUserID is the schema descriptor for owner_user_id field.
+	projectDescOwnerUserID := projectFields[1].Descriptor()
+	// project.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	project.OwnerUserIDValidator = projectDescOwnerUserID.Validators[0].(func(string) error)
+	// projectDescContractID is the schema descriptor for contract_id field.
+	projectDescContractID := projectFields[2].Descriptor()
+	// project.ContractIDValidator is a validator for the "contract_id" field. It is called by the builders before save.
+	project.ContractIDValidator = projectDescContractID.Validators[0].(func(string) error)
+	// projectDescName is the schema descriptor for name field.
+	projectDescName := projectFields[3].Descriptor()
+	// project.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	project.NameValidator = func() func(string) error {
+		validators := projectDescName.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(name string) error {
+			for _, fn := range fns {
+				if err := fn(name); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// projectDescStatus is the schema descriptor for status field.
+	projectDescStatus := projectFields[4].Descriptor()
+	// project.DefaultStatus holds the default value on creation for the status field.
+	project.DefaultStatus = projectDescStatus.Default.(string)
+	// project.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	project.StatusValidator = projectDescStatus.Validators[0].(func(string) error)
+	// projectDescCreatedAt is the schema descriptor for created_at field.
+	projectDescCreatedAt := projectFields[5].Descriptor()
+	// project.DefaultCreatedAt holds the default value on creation for the created_at field.
+	project.DefaultCreatedAt = projectDescCreatedAt.Default.(func() time.Time)
+	// projectDescUpdatedAt is the schema descriptor for updated_at field.
+	projectDescUpdatedAt := projectFields[6].Descriptor()
+	// project.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	project.DefaultUpdatedAt = projectDescUpdatedAt.Default.(func() time.Time)
+	// project.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	project.UpdateDefaultUpdatedAt = projectDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// projectDescID is the schema descriptor for id field.
+	projectDescID := projectFields[0].Descriptor()
+	// project.DefaultID holds the default value on creation for the id field.
+	project.DefaultID = projectDescID.Default.(func() string)
+	sagastateFields := schema.SagaState{}.Fields()
+	_ = sagastateFields
+	// sagastateDescSagaType is the schema descriptor for saga_type field.
+	sagastateDescSagaType := sagastateFields[1].Descriptor()
+	// sagastate.SagaTypeValidator is a validator for the "saga_type" field. It is called by the builders before save.
+	sagastate.SagaTypeValidator = sagastateDescSagaType.Validators[0].(func(string) error)
+	// sagastateDescOrderID is the schema descriptor for order_id field.
+	sagastateDescOrderID := sagastateFields[2].Descriptor()
+	// sagastate.OrderIDValidator is a validator for the "order_id" field. It is called by the builders before save.
+	sagastate.OrderIDValidator = sagastateDescOrderID.Validators[0].(func(string) error)
+	// sagastateDescUserID is the schema descriptor for user_id field.
+	sagastateDescUserID := sagastateFields[3].Descriptor()
+	// sagastate.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	sagastate.UserIDValidator = sagastateDescUserID.Validators[0].(func(string) error)
+	// sagastateDescAmountCents is the schema descriptor for amount_cents field.
+	sagastateDescAmountCents := sagastateFields[4].Descriptor()
+	// sagastate.AmountCentsValidator is a validator for the "amount_cents" field. It is called by the builders before save.
+	sagastate.AmountCentsValidator = sagastateDescAmountCents.Validators[0].(func(uint64) error)
+	// sagastateDescCurrentStep is the schema descriptor for current_step field.
+	sagastateDescCurrentStep := sagastateFields[5].Descriptor()
+	// sagastate.DefaultCurrentStep holds the default value on creation for the current_step field.
+	sagastate.DefaultCurrentStep = sagastateDescCurrentStep.Default.(string)
+	// sagastateDescStatus is the schema descriptor for status field.
+	sagastateDescStatus := sagastateFields[6].Descriptor()
+	// sagastate.DefaultStatus holds the default value on creation for the status field.
+	sagastate.DefaultStatus = sagastateDescStatus.Default.(string)
+	// sagastate.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	sagastate.StatusValidator = sagastateDescStatus.Validators[0].(func(string) error)
+	// sagastateDescIdempotencyKey is the schema descriptor for idempotency_key field.
+	sagastateDescIdempotencyKey := sagastateFields[7].Descriptor()
+	// sagastate.IdempotencyKeyValidator is a validator for the "idempotency_key" field. It is called by the builders before save.
+	sagastate.IdempotencyKeyValidator = sagastateDescIdempotencyKey.Validators[0].(func(string) error)
+	// sagastateDescCreatedAt is the schema descriptor for created_at field.
+	sagastateDescCreatedAt := sagastateFields[10].Descriptor()
+	// sagastate.DefaultCreatedAt holds the default value on creation for the created_at field.
+	sagastate.DefaultCreatedAt = sagastateDescCreatedAt.Default.(func() time.Time)
+	// sagastateDescUpdatedAt is the schema descriptor for updated_at field.
+	sagastateDescUpdatedAt := sagastateFields[11].Descriptor()
+	// sagastate.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	sagastate.DefaultUpdatedAt = sagastateDescUpdatedAt.Default.(func() time.Time)
+	// sagastate.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	sagastate.UpdateDefaultUpdatedAt = sagastateDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// sagastateDescID is the schema descriptor for id field.
+	sagastateDescID := sagastateFields[0].Descriptor()
+	// sagastate.DefaultID holds the default value on creation for the id field.
+	sagastate.DefaultID = sagastateDescID.Default.(func() string)
+	servicecontractFields := schema.ServiceContract{}.Fields()
+	_ = servicecontractFields
+	// servicecontractDescOwnerUserID is the schema descriptor for owner_user_id field.
+	servicecontractDescOwnerUserID := servicecontractFields[1].Descriptor()
+	// servicecontract.OwnerUserIDValidator is a validator for the "owner_user_id" field. It is called by the builders before save.
+	servicecontract.OwnerUserIDValidator = servicecontractDescOwnerUserID.Validators[0].(func(string) error)
+	// servicecontractDescCustomerID is the schema descriptor for customer_id field.
+	servicecontractDescCustomerID := servicecontractFields[2].Descriptor()
+	// servicecontract.CustomerIDValidator is a validator for the "customer_id" field. It is called by the builders before save.
+	servicecontract.CustomerIDValidator = servicecontractDescCustomerID.Validators[0].(func(string) error)
+	// servicecontractDescContractType is the schema descriptor for contract_type field.
+	servicecontractDescContractType := servicecontractFields[3].Descriptor()
+	// servicecontract.ContractTypeValidator is a validator for the "contract_type" field. It is called by the builders before save.
+	servicecontract.ContractTypeValidator = servicecontractDescContractType.Validators[0].(func(string) error)
+	// servicecontractDescTitle is the schema descriptor for title field.
+	servicecontractDescTitle := servicecontractFields[4].Descriptor()
+	// servicecontract.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	servicecontract.TitleValidator = func() func(string) error {
+		validators := servicecontractDescTitle.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(title string) error {
+			for _, fn := range fns {
+				if err := fn(title); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// servicecontractDescAmountCents is the schema descriptor for amount_cents field.
+	servicecontractDescAmountCents := servicecontractFields[5].Descriptor()
+	// servicecontract.AmountCentsValidator is a validator for the "amount_cents" field. It is called by the builders before save.
+	servicecontract.AmountCentsValidator = servicecontractDescAmountCents.Validators[0].(func(uint64) error)
+	// servicecontractDescBillingType is the schema descriptor for billing_type field.
+	servicecontractDescBillingType := servicecontractFields[6].Descriptor()
+	// servicecontract.DefaultBillingType holds the default value on creation for the billing_type field.
+	servicecontract.DefaultBillingType = servicecontractDescBillingType.Default.(string)
+	// servicecontract.BillingTypeValidator is a validator for the "billing_type" field. It is called by the builders before save.
+	servicecontract.BillingTypeValidator = servicecontractDescBillingType.Validators[0].(func(string) error)
+	// servicecontractDescStatus is the schema descriptor for status field.
+	servicecontractDescStatus := servicecontractFields[7].Descriptor()
+	// servicecontract.DefaultStatus holds the default value on creation for the status field.
+	servicecontract.DefaultStatus = servicecontractDescStatus.Default.(string)
+	// servicecontract.StatusValidator is a validator for the "status" field. It is called by the builders before save.
+	servicecontract.StatusValidator = servicecontractDescStatus.Validators[0].(func(string) error)
+	// servicecontractDescStartDate is the schema descriptor for start_date field.
+	servicecontractDescStartDate := servicecontractFields[8].Descriptor()
+	// servicecontract.DefaultStartDate holds the default value on creation for the start_date field.
+	servicecontract.DefaultStartDate = servicecontractDescStartDate.Default.(func() time.Time)
+	// servicecontractDescAutoRenew is the schema descriptor for auto_renew field.
+	servicecontractDescAutoRenew := servicecontractFields[15].Descriptor()
+	// servicecontract.DefaultAutoRenew holds the default value on creation for the auto_renew field.
+	servicecontract.DefaultAutoRenew = servicecontractDescAutoRenew.Default.(bool)
+	// servicecontractDescCreatedAt is the schema descriptor for created_at field.
+	servicecontractDescCreatedAt := servicecontractFields[17].Descriptor()
+	// servicecontract.DefaultCreatedAt holds the default value on creation for the created_at field.
+	servicecontract.DefaultCreatedAt = servicecontractDescCreatedAt.Default.(func() time.Time)
+	// servicecontractDescUpdatedAt is the schema descriptor for updated_at field.
+	servicecontractDescUpdatedAt := servicecontractFields[18].Descriptor()
+	// servicecontract.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	servicecontract.DefaultUpdatedAt = servicecontractDescUpdatedAt.Default.(func() time.Time)
+	// servicecontract.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	servicecontract.UpdateDefaultUpdatedAt = servicecontractDescUpdatedAt.UpdateDefault.(func() time.Time)
+	// servicecontractDescID is the schema descriptor for id field.
+	servicecontractDescID := servicecontractFields[0].Descriptor()
+	// servicecontract.DefaultID holds the default value on creation for the id field.
+	servicecontract.DefaultID = servicecontractDescID.Default.(func() string)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescFirstName is the schema descriptor for first_name field.
@@ -152,4 +792,34 @@ func init() {
 	userDescID := userFields[0].Descriptor()
 	// user.DefaultID holds the default value on creation for the id field.
 	user.DefaultID = userDescID.Default.(func() string)
+	worklogFields := schema.Worklog{}.Fields()
+	_ = worklogFields
+	// worklogDescProjectID is the schema descriptor for project_id field.
+	worklogDescProjectID := worklogFields[1].Descriptor()
+	// worklog.ProjectIDValidator is a validator for the "project_id" field. It is called by the builders before save.
+	worklog.ProjectIDValidator = worklogDescProjectID.Validators[0].(func(string) error)
+	// worklogDescUserID is the schema descriptor for user_id field.
+	worklogDescUserID := worklogFields[3].Descriptor()
+	// worklog.UserIDValidator is a validator for the "user_id" field. It is called by the builders before save.
+	worklog.UserIDValidator = worklogDescUserID.Validators[0].(func(string) error)
+	// worklogDescHours is the schema descriptor for hours field.
+	worklogDescHours := worklogFields[4].Descriptor()
+	// worklog.HoursValidator is a validator for the "hours" field. It is called by the builders before save.
+	worklog.HoursValidator = worklogDescHours.Validators[0].(func(float64) error)
+	// worklogDescDescription is the schema descriptor for description field.
+	worklogDescDescription := worklogFields[5].Descriptor()
+	// worklog.DescriptionValidator is a validator for the "description" field. It is called by the builders before save.
+	worklog.DescriptionValidator = worklogDescDescription.Validators[0].(func(string) error)
+	// worklogDescWorkedAt is the schema descriptor for worked_at field.
+	worklogDescWorkedAt := worklogFields[6].Descriptor()
+	// worklog.DefaultWorkedAt holds the default value on creation for the worked_at field.
+	worklog.DefaultWorkedAt = worklogDescWorkedAt.Default.(func() time.Time)
+	// worklogDescCreatedAt is the schema descriptor for created_at field.
+	worklogDescCreatedAt := worklogFields[7].Descriptor()
+	// worklog.DefaultCreatedAt holds the default value on creation for the created_at field.
+	worklog.DefaultCreatedAt = worklogDescCreatedAt.Default.(func() time.Time)
+	// worklogDescID is the schema descriptor for id field.
+	worklogDescID := worklogFields[0].Descriptor()
+	// worklog.DefaultID holds the default value on creation for the id field.
+	worklog.DefaultID = worklogDescID.Default.(func() string)
 }

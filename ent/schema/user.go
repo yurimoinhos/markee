@@ -6,7 +6,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	"github.com/aggi-tech/aggipay/internal/platform/common"
+	"github.com/aggi-tech/aggipay/platform/common"
 )
 
 // User holds the schema definition for the User entity.

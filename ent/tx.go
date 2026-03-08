@@ -12,10 +12,38 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
+	// AutomationRun is the client for interacting with the AutomationRun builders.
+	AutomationRun *AutomationRunClient
+	// Charge is the client for interacting with the Charge builders.
+	Charge *ChargeClient
+	// ContractSignature is the client for interacting with the ContractSignature builders.
+	ContractSignature *ContractSignatureClient
+	// ContractVersion is the client for interacting with the ContractVersion builders.
+	ContractVersion *ContractVersionClient
+	// Customer is the client for interacting with the Customer builders.
+	Customer *CustomerClient
 	// Group is the client for interacting with the Group builders.
 	Group *GroupClient
+	// IntegrationWebhookEvent is the client for interacting with the IntegrationWebhookEvent builders.
+	IntegrationWebhookEvent *IntegrationWebhookEventClient
+	// Milestone is the client for interacting with the Milestone builders.
+	Milestone *MilestoneClient
+	// Order is the client for interacting with the Order builders.
+	Order *OrderClient
+	// PaymentEvidence is the client for interacting with the PaymentEvidence builders.
+	PaymentEvidence *PaymentEvidenceClient
+	// PaymentRecord is the client for interacting with the PaymentRecord builders.
+	PaymentRecord *PaymentRecordClient
+	// Project is the client for interacting with the Project builders.
+	Project *ProjectClient
+	// SagaState is the client for interacting with the SagaState builders.
+	SagaState *SagaStateClient
+	// ServiceContract is the client for interacting with the ServiceContract builders.
+	ServiceContract *ServiceContractClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
+	// Worklog is the client for interacting with the Worklog builders.
+	Worklog *WorklogClient
 
 	// lazily loaded.
 	client     *Client
@@ -147,8 +175,22 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
+	tx.AutomationRun = NewAutomationRunClient(tx.config)
+	tx.Charge = NewChargeClient(tx.config)
+	tx.ContractSignature = NewContractSignatureClient(tx.config)
+	tx.ContractVersion = NewContractVersionClient(tx.config)
+	tx.Customer = NewCustomerClient(tx.config)
 	tx.Group = NewGroupClient(tx.config)
+	tx.IntegrationWebhookEvent = NewIntegrationWebhookEventClient(tx.config)
+	tx.Milestone = NewMilestoneClient(tx.config)
+	tx.Order = NewOrderClient(tx.config)
+	tx.PaymentEvidence = NewPaymentEvidenceClient(tx.config)
+	tx.PaymentRecord = NewPaymentRecordClient(tx.config)
+	tx.Project = NewProjectClient(tx.config)
+	tx.SagaState = NewSagaStateClient(tx.config)
+	tx.ServiceContract = NewServiceContractClient(tx.config)
 	tx.User = NewUserClient(tx.config)
+	tx.Worklog = NewWorklogClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -158,7 +200,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Group.QueryXXX(), the query will be executed
+// applies a query, for example: AutomationRun.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

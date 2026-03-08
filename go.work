@@ -1,0 +1,12 @@
+go 1.25.0
+
+use (
+	.
+	./contracts
+	./ent
+	./modules/auth
+	./modules/order
+	./modules/payment
+	./platform
+	./saga
+)

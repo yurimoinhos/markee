@@ -6,8 +6,50 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
+// AutomationRun is the predicate function for automationrun builders.
+type AutomationRun func(*sql.Selector)
+
+// Charge is the predicate function for charge builders.
+type Charge func(*sql.Selector)
+
+// ContractSignature is the predicate function for contractsignature builders.
+type ContractSignature func(*sql.Selector)
+
+// ContractVersion is the predicate function for contractversion builders.
+type ContractVersion func(*sql.Selector)
+
+// Customer is the predicate function for customer builders.
+type Customer func(*sql.Selector)
+
 // Group is the predicate function for group builders.
 type Group func(*sql.Selector)
 
+// IntegrationWebhookEvent is the predicate function for integrationwebhookevent builders.
+type IntegrationWebhookEvent func(*sql.Selector)
+
+// Milestone is the predicate function for milestone builders.
+type Milestone func(*sql.Selector)
+
+// Order is the predicate function for order builders.
+type Order func(*sql.Selector)
+
+// PaymentEvidence is the predicate function for paymentevidence builders.
+type PaymentEvidence func(*sql.Selector)
+
+// PaymentRecord is the predicate function for paymentrecord builders.
+type PaymentRecord func(*sql.Selector)
+
+// Project is the predicate function for project builders.
+type Project func(*sql.Selector)
+
+// SagaState is the predicate function for sagastate builders.
+type SagaState func(*sql.Selector)
+
+// ServiceContract is the predicate function for servicecontract builders.
+type ServiceContract func(*sql.Selector)
+
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
+
+// Worklog is the predicate function for worklog builders.
+type Worklog func(*sql.Selector)

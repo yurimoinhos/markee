@@ -1,5 +1,126 @@
 basePath: /api/v1
 definitions:
+  automation.RunResult:
+    properties:
+      contracts_near_expiry:
+        type: integer
+      monthly_report_generated:
+        type: integer
+      projects_suspended:
+        type: integer
+      recurring_charges_made:
+        type: integer
+      reminders_sent:
+        type: integer
+    type: object
+  billing.CreateChargeInput:
+    properties:
+      amount_cents:
+        type: integer
+      charge_type:
+        type: string
+      contract_id:
+        type: string
+      customer_id:
+        type: string
+      description:
+        type: string
+      due_date:
+        type: string
+      milestone_id:
+        type: string
+      payment_method:
+        type: string
+    type: object
+  billing.PaymentLinkResponse:
+    properties:
+      charge_id:
+        type: string
+      link:
+        type: string
+    type: object
+  billing.PaymentQRResponse:
+    properties:
+      charge_id:
+        type: string
+      qr_code:
+        type: string
+    type: object
+  contracts.CreateContractInput:
+    properties:
+      amount_cents:
+        type: integer
+      auto_renew:
+        type: boolean
+      billing_type:
+        type: string
+      contract_type:
+        type: string
+      customer_id:
+        type: string
+      deliverables:
+        type: string
+      duration_months:
+        type: integer
+      end_date:
+        type: string
+      payment_terms:
+        type: string
+      penalties:
+        type: string
+      sla:
+        type: string
+      start_date:
+        type: string
+      title:
+        type: string
+    type: object
+  contracts.GenerateContractInput:
+    properties:
+      editable_content:
+        type: string
+      template_name:
+        type: string
+    type: object
+  contracts.SendSignatureInput:
+    properties:
+      signer_email:
+        type: string
+      signer_name:
+        type: string
+    type: object
+  customers.CreateCustomerInput:
+    properties:
+      address:
+        type: string
+      company:
+        type: string
+      cpf_cnpj:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      preferred_payment_method:
+        type: string
+    type: object
+  customers.UpdateCustomerInput:
+    properties:
+      address:
+        type: string
+      company:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      preferred_payment_method:
+        type: string
+    type: object
   domain.User:
     properties:
       active:
@@ -21,31 +142,73 @@ definitions:
       updatedAt:
         type: string
     type: object
-  http.errorResponse:
+  finance.CashFlowPoint:
     properties:
-      error:
-        example: mensagem de erro
+      date:
+        type: string
+      in_cents:
+        type: integer
+      pending_cents:
+        type: integer
+    type: object
+  finance.Dashboard:
+    properties:
+      active_contracts:
+        type: integer
+      expiring_contracts:
+        type: integer
+      monthly_revenue_cents:
+        type: integer
+      mrr_cents:
+        type: integer
+      payments_received:
+        type: integer
+      pending_payments:
+        type: integer
+    type: object
+  finance.DefaultMetrics:
+    properties:
+      default_rate_percent:
+        type: number
+      growth_percent:
+        type: number
+      overdue_charges:
+        type: integer
+    type: object
+  http.createOrderRequest:
+    properties:
+      amount_cents:
+        minimum: 1
+        type: integer
+      description:
+        type: string
+      user_id:
+        type: string
+    required:
+    - user_id
+    type: object
+  http.oidcAuthResponse:
+    properties:
+      auth_url:
+        example: https://accounts.google.com/o/oauth2/auth?...
+        type: string
+      code_verifier:
+        example: dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+        type: string
+      state:
+        example: eyJhbGci...
         type: string
     type: object
-  http.registerRequest:
+  http.oidcCallbackRequest:
     properties:
-      email:
-        example: yuri@example.com
+      code:
+        example: 4/0AX4XfWi...
         type: string
-      firstName:
-        example: Yuri
+      code_verifier:
+        example: dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
         type: string
-      lastName:
-        example: Moinhos
-        type: string
-      phoneNumber:
-        example: "11999999999"
-        type: string
-    type: object
-  http.tokenRequest:
-    properties:
-      email:
-        example: yuri@example.com
+      state:
+        example: eyJhbGci...
         type: string
     type: object
   http.tokenResponse:
@@ -60,13 +223,107 @@ definitions:
   http.updateUserRequest:
     properties:
       firstName:
-        example: Yuri
+        example: João
         type: string
       lastName:
-        example: Moinhos
+        example: Silva
         type: string
       phoneNumber:
         example: "11999999999"
+        type: string
+    type: object
+  http.userPageResponse:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/domain.User'
+        type: array
+      page:
+        type: integer
+      pageSize:
+        type: integer
+      total:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+  payments.ConfirmPaymentInput:
+    properties:
+      amount_cents:
+        type: integer
+      charge_id:
+        type: string
+      method:
+        type: string
+      paid_at:
+        type: string
+      receipt_url:
+        type: string
+      tx_hash:
+        type: string
+    type: object
+  payments.EvidenceInput:
+    properties:
+      file_url:
+        type: string
+      note:
+        type: string
+      tx_hash:
+        type: string
+    type: object
+  problem.BaseErr:
+    properties:
+      details:
+        description: Details contém informações adicionais opcionais sobre o erro.
+      error:
+        description: Title é o título legível do tipo de problema.
+        type: string
+      errorDescription:
+        description: ErrorDescription é uma explicação específica desta ocorrência.
+        type: string
+      instance:
+        description: Instance é o URI da requisição que originou o erro.
+        type: string
+      statusCode:
+        description: StatusCode é o código HTTP associado ao problema.
+        type: integer
+      timestamp:
+        description: Timestamp indica quando o erro ocorreu (UTC, ISO 8601).
+        type: string
+      type:
+        description: Type é um URI que identifica o tipo do problema (único por categoria
+          de erro).
+        type: string
+    type: object
+  projects.CreateMilestoneInput:
+    properties:
+      amount_cents:
+        type: integer
+      contract_id:
+        type: string
+      deliverables:
+        type: string
+      due_date:
+        type: string
+      title:
+        type: string
+    type: object
+  projects.CreateProjectInput:
+    properties:
+      contract_id:
+        type: string
+      name:
+        type: string
+    type: object
+  projects.CreateWorklogInput:
+    properties:
+      description:
+        type: string
+      hours:
+        type: number
+      milestone_id:
+        type: string
+      worked_at:
         type: string
     type: object
 host: localhost:8000
@@ -76,48 +333,20 @@ info:
   title: AggiPay API
   version: 1.0.0
 paths:
-  /auth/register:
+  /auth/google/callback:
     post:
       consumes:
       - application/json
-      description: Cria um novo usuário no sistema
+      description: Troca o authorization code pelo JWT da aplicação usando PKCE. O
+        cliente envia o code recebido do Google, o state e o code_verifier gerados
+        no passo anterior.
       parameters:
-      - description: Dados do usuário
+      - description: Parâmetros do callback
         in: body
         name: body
         required: true
         schema:
-          $ref: '#/definitions/http.registerRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/domain.User'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/http.errorResponse'
-      summary: Registrar usuário
-      tags:
-      - Auth
-  /auth/token:
-    post:
-      consumes:
-      - application/json
-      description: Gera um JWT para o e-mail informado (autenticação sem senha)
-      parameters:
-      - description: E-mail do usuário
-        in: body
-        name: body
-        required: true
-        schema:
-          $ref: '#/definitions/http.tokenRequest'
+          $ref: '#/definitions/http.oidcCallbackRequest'
       produces:
       - application/json
       responses:
@@ -128,12 +357,118 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/http.errorResponse'
-      summary: Gerar access token
+            $ref: '#/definitions/problem.BaseErr'
+      summary: Finalizar login com Google
+      tags:
+      - Auth
+  /auth/google/login:
+    get:
+      description: Retorna a URL de autorização do Google e os parâmetros PKCE. O
+        cliente deve armazenar state e code_verifier, depois redirecionar o usuário
+        para auth_url.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.oidcAuthResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      summary: Iniciar login com Google
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Autentica com email e senha, retorna JWT de acesso
+      parameters:
+      - description: E-mail
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Senha
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.tokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      summary: Login local
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/x-www-form-urlencoded
+      description: Cria um novo usuário com email e senha. Usa criptografia Argon2ID
+        com alto uso de processamento.
+      parameters:
+      - description: Primeiro nome
+        in: formData
+        name: firstName
+        required: true
+        type: string
+      - description: Sobrenome
+        in: formData
+        name: lastName
+        required: true
+        type: string
+      - description: E-mail
+        in: formData
+        name: email
+        required: true
+        type: string
+      - description: Telefone
+        in: formData
+        name: phoneNumber
+        type: string
+      - description: Senha
+        in: formData
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/domain.User'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      summary: Registrar usuário
       tags:
       - Auth
   /auth/users:
@@ -154,13 +489,11 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/domain.User'
-            type: array
+            $ref: '#/definitions/http.userPageResponse'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
       security:
       - BearerAuth: []
       summary: Listar usuários
@@ -187,11 +520,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
       security:
       - BearerAuth: []
       summary: Desativar usuário
@@ -215,11 +548,11 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
       security:
       - BearerAuth: []
       summary: Buscar usuário
@@ -251,20 +584,820 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/http.errorResponse'
+            $ref: '#/definitions/problem.BaseErr'
       security:
       - BearerAuth: []
       summary: Atualizar usuário
       tags:
       - Users
+  /automation/run:
+    post:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/automation.RunResult'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Executar automações financeiras
+      tags:
+      - Automation
+  /automation/runs:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Histórico de automações
+      tags:
+      - Automation
+  /charges:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Listar cobranças
+      tags:
+      - Billing
+    post:
+      consumes:
+      - application/json
+      description: Gera cobrança única, mensal ou por milestone
+      parameters:
+      - description: Dados da cobrança
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/billing.CreateChargeInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Criar cobrança
+      tags:
+      - Billing
+  /charges/{id}/pay-link:
+    post:
+      parameters:
+      - description: ID da cobrança
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/billing.PaymentLinkResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Obter link de pagamento
+      tags:
+      - Billing
+  /charges/{id}/pay-qr:
+    post:
+      parameters:
+      - description: ID da cobrança
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/billing.PaymentQRResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Obter QR Code de pagamento
+      tags:
+      - Billing
+  /contracts:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Listar contratos
+      tags:
+      - Contracts
+    post:
+      consumes:
+      - application/json
+      description: Cadastra contrato de serviço de software
+      parameters:
+      - description: Dados do contrato
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.CreateContractInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Criar contrato
+      tags:
+      - Contracts
+  /contracts/{id}:
+    get:
+      parameters:
+      - description: ID do contrato
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Buscar contrato
+      tags:
+      - Contracts
+  /contracts/{id}/generate:
+    post:
+      consumes:
+      - application/json
+      description: Gera artefatos PDF/editável para assinatura
+      parameters:
+      - description: ID do contrato
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Template e conteúdo
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.GenerateContractInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Gerar versão de contrato
+      tags:
+      - Contracts
+  /contracts/{id}/send-signature:
+    post:
+      consumes:
+      - application/json
+      description: Cria documento no Clicksign e retorna URL de assinatura
+      parameters:
+      - description: ID do contrato
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados do signatário
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/contracts.SendSignatureInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Enviar para assinatura
+      tags:
+      - Contracts
+  /customers:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Listar clientes
+      tags:
+      - Customers
+    post:
+      consumes:
+      - application/json
+      description: Cadastra um cliente para gestão financeira/contratos
+      parameters:
+      - description: Dados do cliente
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customers.CreateCustomerInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Criar cliente
+      tags:
+      - Customers
+  /customers/{id}:
+    get:
+      description: Retorna cadastro e resumo financeiro do cliente
+      parameters:
+      - description: ID do cliente
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Detalhar cliente
+      tags:
+      - Customers
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do cliente
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados para atualização
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/customers.UpdateCustomerInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Atualizar cliente
+      tags:
+      - Customers
+  /finance/cashflow:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/finance.CashFlowPoint'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Fluxo de caixa
+      tags:
+      - Finance
+  /finance/dashboard:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/finance.Dashboard'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Dashboard financeiro
+      tags:
+      - Finance
+  /finance/defaults:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/finance.DefaultMetrics'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Métricas de inadimplência e crescimento
+      tags:
+      - Finance
+  /orders:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dados do pedido
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/http.createOrderRequest'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Cria um pedido de pagamento
+      tags:
+      - Orders
+  /orders/{id}:
+    get:
+      parameters:
+      - description: ID do pedido
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Consulta um pedido pelo ID
+      tags:
+      - Orders
+  /payments:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Listar pagamentos
+      tags:
+      - Payments
+  /payments/{id}/evidence:
+    post:
+      consumes:
+      - application/json
+      description: Anexa evidência/comprovante e hash de transação cripto
+      parameters:
+      - description: ID do pagamento
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados do comprovante
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/payments.EvidenceInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Adicionar comprovante
+      tags:
+      - Payments
+  /payments/confirm:
+    post:
+      consumes:
+      - application/json
+      description: Confirma pagamento manual ou por conciliação externa
+      parameters:
+      - description: Dados do pagamento
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/payments.ConfirmPaymentInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Confirmar pagamento
+      tags:
+      - Payments
+  /projects:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              additionalProperties: true
+              type: object
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Listar projetos
+      tags:
+      - Projects
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Dados do projeto
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/projects.CreateProjectInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Criar projeto
+      tags:
+      - Projects
+  /projects/{id}/milestones:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do projeto
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados do milestone
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/projects.CreateMilestoneInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Criar milestone
+      tags:
+      - Projects
+  /projects/{id}/worklogs:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: ID do projeto
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dados do worklog
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/projects.CreateWorklogInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/problem.BaseErr'
+      security:
+      - BearerAuth: []
+      summary: Criar worklog
+      tags:
+      - Projects
+  /webhooks/asaas:
+    post:
+      consumes:
+      - application/json
+      description: Recebe eventos de cobrança/pagamento do Asaas
+      parameters:
+      - description: Evento Asaas
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Webhook Asaas
+      tags:
+      - Webhooks
+  /webhooks/clicksign:
+    post:
+      consumes:
+      - application/json
+      description: Recebe eventos de assinatura digital do Clicksign
+      parameters:
+      - description: Evento Clicksign
+        in: body
+        name: body
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Webhook Clicksign
+      tags:
+      - Webhooks
 securityDefinitions:
   BearerAuth:
     description: 'Informe: Bearer {token}'
