@@ -1,6 +1,8 @@
 package projects
 
 import (
+	"context"
+
 	"github.com/aggi-tech/aggipay/ent"
 	"github.com/aggi-tech/aggipay/platform/httpauth"
 	"github.com/aggi-tech/aggipay/platform/router"
@@ -12,7 +14,7 @@ type Module struct {
 	auth    gin.HandlerFunc
 }
 
-func NewModule(client *ent.Client, validateJWT func(string) (string, string, error)) *Module {
+func NewModule(client *ent.Client, validateJWT func(context.Context, string) (*httpauth.AuthContext, error)) *Module {
 	repo := NewRepository(client)
 	svc := NewService(repo)
 	return &Module{handler: NewHandler(svc), auth: httpauth.BearerAuthMiddleware(validateJWT)}
@@ -20,10 +22,10 @@ func NewModule(client *ent.Client, validateJWT func(string) (string, string, err
 
 func (m *Module) Routes() router.Routes {
 	return router.Routes{
-		router.POST("/projects", m.handler.CreateProject, m.auth),
-		router.GET("/projects", m.handler.ListProjects, m.auth),
-		router.POST("/projects/:id/milestones", m.handler.CreateMilestone, m.auth),
-		router.POST("/projects/:id/worklogs", m.handler.CreateWorklog, m.auth),
+		router.POST("/projects", m.handler.CreateProject, m.auth, httpauth.RequireAnyPermission("projects.write")),
+		router.GET("/projects", m.handler.ListProjects, m.auth, httpauth.RequireAnyPermission("projects.read")),
+		router.POST("/projects/:id/milestones", m.handler.CreateMilestone, m.auth, httpauth.RequireAnyPermission("projects.write")),
+		router.POST("/projects/:id/worklogs", m.handler.CreateWorklog, m.auth, httpauth.RequireAnyPermission("projects.write")),
 	}
 }
 

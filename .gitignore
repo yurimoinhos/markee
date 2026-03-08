@@ -2,3 +2,7 @@
 .docker/
 go.sum
 .idea/
+frontend-next/node_modules/
+frontend-next/.next/
+mobile-native/node_modules/
+mobile-native/.expo/

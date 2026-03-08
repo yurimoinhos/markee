@@ -1,6 +1,8 @@
 package contracts
 
 import (
+	"context"
+
 	"github.com/aggi-tech/aggipay/ent"
 	"github.com/aggi-tech/aggipay/platform/config"
 	"github.com/aggi-tech/aggipay/platform/httpauth"
@@ -13,7 +15,7 @@ type Module struct {
 	auth    gin.HandlerFunc
 }
 
-func NewModule(client *ent.Client, cfg *config.Config, validateJWT func(string) (string, string, error)) *Module {
+func NewModule(client *ent.Client, cfg *config.Config, validateJWT func(context.Context, string) (*httpauth.AuthContext, error)) *Module {
 	repo := NewRepository(client)
 	svc := NewService(repo, NewClicksignProvider(cfg))
 	return &Module{handler: NewHandler(svc), auth: httpauth.BearerAuthMiddleware(validateJWT)}
@@ -21,11 +23,11 @@ func NewModule(client *ent.Client, cfg *config.Config, validateJWT func(string) 
 
 func (m *Module) Routes() router.Routes {
 	return router.Routes{
-		router.POST("/contracts", m.handler.Create, m.auth),
-		router.GET("/contracts", m.handler.List, m.auth),
-		router.GET("/contracts/:id", m.handler.Get, m.auth),
-		router.POST("/contracts/:id/generate", m.handler.Generate, m.auth),
-		router.POST("/contracts/:id/send-signature", m.handler.SendSignature, m.auth),
+		router.POST("/contracts", m.handler.Create, m.auth, httpauth.RequireAnyPermission("contracts.write")),
+		router.GET("/contracts", m.handler.List, m.auth, httpauth.RequireAnyPermission("contracts.read")),
+		router.GET("/contracts/:id", m.handler.Get, m.auth, httpauth.RequireAnyPermission("contracts.read")),
+		router.POST("/contracts/:id/generate", m.handler.Generate, m.auth, httpauth.RequireAnyPermission("contracts.write")),
+		router.POST("/contracts/:id/send-signature", m.handler.SendSignature, m.auth, httpauth.RequireAnyPermission("contracts.write")),
 	}
 }
 

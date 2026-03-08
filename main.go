@@ -30,8 +30,10 @@ import (
 	projectsmodule "github.com/aggi-tech/aggipay/modules/projects"
 	webhooksmodule "github.com/aggi-tech/aggipay/modules/webhooks"
 	"github.com/aggi-tech/aggipay/platform/config"
+	"github.com/aggi-tech/aggipay/platform/httpauth"
 	"github.com/aggi-tech/aggipay/platform/password"
 	"github.com/aggi-tech/aggipay/platform/problem"
+	"github.com/aggi-tech/aggipay/webui"
 	"github.com/gin-gonic/gin"
 	"github.com/go-openapi/swag"
 	"github.com/joho/godotenv"
@@ -60,18 +62,15 @@ func main() {
 
 	router.GET("/swagger", func(c *gin.Context) { c.Redirect(http.StatusMovedPermanently, "/swagger/index.html") })
 	router.GET("/swagger/*all", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	webui.RegisterRoutes(router, cfg)
 
 	api := router.Group("/api/v1")
 
 	auth := authmodule.NewModule(client, cfg, nil)
 	auth.RegisterRoutes(api)
 
-	validateJWT := func(token string) (string, string, error) {
-		claims, err := auth.ValidateToken(token)
-		if err != nil {
-			return "", "", err
-		}
-		return claims.UserID, claims.Email, nil
+	validateJWT := func(ctx context.Context, token string) (*httpauth.AuthContext, error) {
+		return auth.ValidateToken(ctx, token)
 	}
 
 	customersmodule.NewModule(client, validateJWT).RegisterRoutes(api)

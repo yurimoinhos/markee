@@ -18,8 +18,11 @@ import (
 // ── JWT Provider ─────────────────────────────────────────────────────────────
 
 type Claims struct {
-	UserID string `json:"user_id"`
-	Email  string `json:"email"`
+	UserID      string   `json:"user_id"`
+	Email       string   `json:"email"`
+	Role        string   `json:"role"`
+	Roles       []string `json:"roles"`
+	Permissions []string `json:"permissions"`
 	jwt.RegisteredClaims
 }
 
@@ -40,8 +43,11 @@ func NewJWTProvider(cfg config.JWTConfig) *JWTProvider {
 func (p *JWTProvider) GenerateToken(user domain.User) (string, error) {
 	now := time.Now()
 	claims := Claims{
-		UserID: user.ID,
-		Email:  user.Email,
+		UserID:      user.ID,
+		Email:       user.Email,
+		Role:        user.Role,
+		Roles:       user.Roles,
+		Permissions: user.Permissions,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    p.issuer,
 			Subject:   user.ID,
@@ -68,6 +74,9 @@ func (p *JWTProvider) ValidateToken(tokenString string) (*Claims, error) {
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
 		return nil, errors.New("as permissões do token são inválidas para essa requisição")
+	}
+	if claims.UserID == "" || claims.Email == "" || claims.Role == "" {
+		return nil, errors.New("claims obrigatórias ausentes")
 	}
 
 	return claims, nil

@@ -23,7 +23,9 @@ import (
 	"github.com/aggi-tech/aggipay/ent/order"
 	"github.com/aggi-tech/aggipay/ent/paymentevidence"
 	"github.com/aggi-tech/aggipay/ent/paymentrecord"
+	"github.com/aggi-tech/aggipay/ent/permission"
 	"github.com/aggi-tech/aggipay/ent/project"
+	"github.com/aggi-tech/aggipay/ent/role"
 	"github.com/aggi-tech/aggipay/ent/sagastate"
 	"github.com/aggi-tech/aggipay/ent/servicecontract"
 	"github.com/aggi-tech/aggipay/ent/user"
@@ -99,7 +101,9 @@ func checkColumn(t, c string) error {
 			order.Table:                   order.ValidColumn,
 			paymentevidence.Table:         paymentevidence.ValidColumn,
 			paymentrecord.Table:           paymentrecord.ValidColumn,
+			permission.Table:              permission.ValidColumn,
 			project.Table:                 project.ValidColumn,
+			role.Table:                    role.ValidColumn,
 			sagastate.Table:               sagastate.ValidColumn,
 			servicecontract.Table:         servicecontract.ValidColumn,
 			user.Table:                    user.ValidColumn,

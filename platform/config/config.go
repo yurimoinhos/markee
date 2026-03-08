@@ -10,6 +10,7 @@ type Config struct {
 	DatabaseURL string
 	JWT         JWTConfig
 	Server      ServerConfig
+	Frontend    FrontendConfig
 	OIDC        OIDCConfig
 	Pepper      string
 	RabbitMQ    RabbitMQConfig
@@ -43,6 +44,10 @@ type ServerConfig struct {
 	Addr string
 }
 
+type FrontendConfig struct {
+	NextInternalURL string
+}
+
 type OIDCConfig struct {
 	Google GoogleOIDCConfig
 }
@@ -72,6 +77,9 @@ func Load() *Config {
 		},
 		Server: ServerConfig{
 			Addr: getEnvOrDefault("SERVER_ADDR", ":8000"),
+		},
+		Frontend: FrontendConfig{
+			NextInternalURL: getEnvOrDefault("NEXT_INTERNAL_URL", "http://127.0.0.1:3001"),
 		},
 		OIDC: OIDCConfig{
 			Google: GoogleOIDCConfig{

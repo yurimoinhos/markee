@@ -3,10 +3,10 @@ package http
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/aggi-tech/aggipay/modules/auth/application"
 	"github.com/aggi-tech/aggipay/modules/auth/domain"
+	"github.com/aggi-tech/aggipay/platform/httpauth"
 	"github.com/aggi-tech/aggipay/platform/problem"
 	"github.com/gin-gonic/gin"
 )
@@ -197,6 +197,32 @@ func (h *Handler) GoogleCallback(c *gin.Context) {
 	c.JSON(http.StatusOK, tokenResponse{AccessToken: token, TokenType: "Bearer"})
 }
 
+// Me godoc
+//
+//	@Summary		Usuário autenticado
+//	@Description	Retorna os dados do usuário associado ao token Bearer
+//	@Tags			Auth
+//	@Produce		json
+//	@Security		BearerAuth
+//	@Success		200	{object}	domain.User
+//	@Failure		401	{object}	problem.BaseErr
+//	@Router			/auth/me [get]
+func (h *Handler) Me(c *gin.Context) {
+	userID, ok := httpauth.UserID(c)
+	if !ok {
+		_ = c.Error(problem.Unauthorized("usuário não autenticado"))
+		return
+	}
+
+	user, err := h.useCase.GetUser(c.Request.Context(), userID)
+	if err != nil {
+		_ = c.Error(err)
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
 // UpdateUser godoc
 //
 //	@Summary		Atualizar usuário
@@ -312,34 +338,4 @@ func optionalString(value string) *string {
 		return nil
 	}
 	return &value
-}
-
-// BearerAuthMiddleware valida o token Bearer do header Authorization.
-func BearerAuthMiddleware(validate func(tokenString string) (userID string, email string, err error)) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		authorization := strings.TrimSpace(c.GetHeader("Authorization"))
-		if authorization == "" {
-			_ = c.Error(problem.Unauthorized("token não informado"))
-			c.Abort()
-			return
-		}
-
-		parts := strings.SplitN(authorization, " ", 2)
-		if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") {
-			_ = c.Error(problem.Unauthorized("formato de token inválido, use: Bearer {token}"))
-			c.Abort()
-			return
-		}
-
-		userID, email, err := validate(strings.TrimSpace(parts[1]))
-		if err != nil {
-			_ = c.Error(problem.Unauthorized("token inválido ou expirado"))
-			c.Abort()
-			return
-		}
-
-		c.Set("auth.user_id", userID)
-		c.Set("auth.email", email)
-		c.Next()
-	}
 }

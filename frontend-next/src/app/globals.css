@@ -1,0 +1,37 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  background: radial-gradient(circle at top right, #dbeafe 0%, #f8fafc 45%, #e2e8f0 100%);
+  color: #0f172a;
+}
+
+input,
+textarea,
+select,
+button {
+  font: inherit;
+}
+
+input,
+textarea,
+select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.65rem;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #5eead4;
+  border-color: #0f766e;
+}

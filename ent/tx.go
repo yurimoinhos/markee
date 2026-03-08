@@ -34,8 +34,12 @@ type Tx struct {
 	PaymentEvidence *PaymentEvidenceClient
 	// PaymentRecord is the client for interacting with the PaymentRecord builders.
 	PaymentRecord *PaymentRecordClient
+	// Permission is the client for interacting with the Permission builders.
+	Permission *PermissionClient
 	// Project is the client for interacting with the Project builders.
 	Project *ProjectClient
+	// Role is the client for interacting with the Role builders.
+	Role *RoleClient
 	// SagaState is the client for interacting with the SagaState builders.
 	SagaState *SagaStateClient
 	// ServiceContract is the client for interacting with the ServiceContract builders.
@@ -186,7 +190,9 @@ func (tx *Tx) init() {
 	tx.Order = NewOrderClient(tx.config)
 	tx.PaymentEvidence = NewPaymentEvidenceClient(tx.config)
 	tx.PaymentRecord = NewPaymentRecordClient(tx.config)
+	tx.Permission = NewPermissionClient(tx.config)
 	tx.Project = NewProjectClient(tx.config)
+	tx.Role = NewRoleClient(tx.config)
 	tx.SagaState = NewSagaStateClient(tx.config)
 	tx.ServiceContract = NewServiceContractClient(tx.config)
 	tx.User = NewUserClient(tx.config)

@@ -14,6 +14,9 @@ type User struct {
 	FirstName     string    `json:"firstName"`
 	LastName      string    `json:"lastName"`
 	Email         string    `json:"email"`
+	Role          string    `json:"role"`
+	Roles         []string  `json:"roles"`
+	Permissions   []string  `json:"permissions"`
 	PhoneNumber   *string   `json:"phoneNumber,omitempty"`
 	Balance       uint64    `json:"balance"`
 	Active        bool      `json:"active"`

@@ -112,6 +112,9 @@ func (u *UseCase) Register(ctx context.Context, input RegisterInput) (*domain.Us
 		FirstName:    strings.TrimSpace(input.FirstName),
 		LastName:     strings.TrimSpace(input.LastName),
 		Email:        strings.TrimSpace(strings.ToLower(input.Email)),
+		Roles:        []string{domain.DefaultRole},
+		Role:         domain.PrimaryRole([]string{domain.DefaultRole}),
+		Permissions:  domain.PermissionsForRoles([]string{domain.DefaultRole}),
 		PhoneNumber:  cleanOptionalString(input.PhoneNumber),
 		PasswordHash: &hash,
 		Balance:      0,
@@ -159,6 +162,10 @@ func (u *UseCase) Login(ctx context.Context, input LoginInput) (string, error) {
 		return "", ErrInvalidCredentials
 	}
 
+	found.Roles = domain.NormalizeRoles(found.Roles)
+	found.Role = domain.PrimaryRole(found.Roles)
+	found.Permissions = domain.EnsurePermissionsForRoles(found.Roles, found.Permissions)
+
 	return u.tokenProvider.GenerateToken(*found)
 }
 
@@ -186,6 +193,9 @@ func (u *UseCase) OIDCExchange(ctx context.Context, input OIDCExchangeInput) (st
 		FirstName:     strings.TrimSpace(info.FirstName),
 		LastName:      strings.TrimSpace(info.LastName),
 		Email:         strings.TrimSpace(strings.ToLower(info.Email)),
+		Roles:         []string{domain.DefaultRole},
+		Role:          domain.PrimaryRole([]string{domain.DefaultRole}),
+		Permissions:   domain.PermissionsForRoles([]string{domain.DefaultRole}),
 		OAuthProvider: &info.Provider,
 		OAuthSub:      &info.Sub,
 		Active:        true,
@@ -273,6 +283,10 @@ func (u *UseCase) IssueToken(ctx context.Context, email string) (string, error) 
 	if !found.Active {
 		return "", ErrInvalidCredentials
 	}
+
+	found.Roles = domain.NormalizeRoles(found.Roles)
+	found.Role = domain.PrimaryRole(found.Roles)
+	found.Permissions = domain.EnsurePermissionsForRoles(found.Roles, found.Permissions)
 
 	return u.tokenProvider.GenerateToken(*found)
 }
